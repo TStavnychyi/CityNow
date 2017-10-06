@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fitsSystemWindows="true"
+    >
+
+    <ImageView
+        android:id="@+id/iv_temp_background_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        />
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"
+        >
+
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+
+            >
+
+            <TextView
+                android:id="@+id/tv_temp_city"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/color_white_secondary"
+                android:textSize="18sp"
+                android:layout_marginLeft="16dp"
+                />
+
+
+            <TextView
+                android:id="@+id/tv_temp_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:textSize="16sp"
+                android:textColor="@color/color_white_secondary"
+                android:layout_below="@id/tv_temp_city"
+                android:layout_marginTop="16dp"
+                />
+
+
+            <TextView
+                android:id="@+id/tv_temp_temp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_temp_time"
+                android:textSize="62sp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="16dp"
+                android:textColor="@android:color/white"
+                />
+
+            <TextView
+                android:id="@+id/tv_temp_description"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:layout_marginLeft="16dp"
+                android:layout_below="@id/tv_temp_temp"
+                android:layout_marginTop="16dp"
+                android:textColor="@color/color_white_secondary"
+                />
+
+            <TextView
+                android:id="@+id/tv_temp_feels_like"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_temp_description"
+                android:layout_marginLeft="16dp"
+                android:textSize="18sp"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/color_white_secondary"
+                />
+
+            <TextView
+                android:id="@+id/tv_temp_humidity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_temp_feels_like"
+                android:layout_marginLeft="16dp"
+                android:textSize="18sp"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/color_white_secondary"
+                />
+
+            <TextView
+                android:id="@+id/tv_temp_wind_speed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_temp_humidity"
+                android:layout_marginLeft="16dp"
+                android:textSize="18sp"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/color_white_secondary"
+                />
+
+        </RelativeLayout>
+        </android.support.v4.widget.SwipeRefreshLayout>
+
+</RelativeLayout>
