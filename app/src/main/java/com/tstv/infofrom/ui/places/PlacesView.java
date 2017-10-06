@@ -1,5 +1,6 @@
 package com.tstv.infofrom.ui.places;
 
+import com.tstv.infofrom.model.places.PlacePrediction;
 import com.tstv.infofrom.ui.base.BaseView;
 
 /**
@@ -8,4 +9,9 @@ import com.tstv.infofrom.ui.base.BaseView;
 
 public interface PlacesView extends BaseView {
 
+    void setLocationData(PlacePrediction data);
+
+    void showRecyclerViewProgress();
+
+    void hiderRecyclerViewProgress();
 }

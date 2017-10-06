@@ -15,11 +15,13 @@ public class PlacePrediction {
 
     private Bitmap bitmap;
 
+    private String imageUrl;
+
     public PlacePrediction(){}
 
-    public PlacePrediction(String id, String placeName) {
-        this.id = id;
+    public PlacePrediction(String placeName, String imageUrl) {
         this.placeName = placeName;
+        this.imageUrl = imageUrl;
     }
 
     public PlacePrediction(String id, String placeName, String placeDescription, Bitmap bitmap) {
@@ -59,5 +61,13 @@ public class PlacePrediction {
 
     public void setPlaceDescription(String placeDescription) {
         this.placeDescription = placeDescription;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }
