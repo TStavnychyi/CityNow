@@ -1,5 +1,6 @@
 package com.tstv.infofrom.di.module;
 
+import com.tstv.infofrom.di.scopes.PlacesScope;
 import com.tstv.infofrom.rest.RestClient;
 import com.tstv.infofrom.rest.api.NearbyPlacesApi;
 import com.tstv.infofrom.rest.api.WeatherApi;
@@ -17,17 +18,16 @@ import dagger.Provides;
 public class RestModule {
     private RestClient mRestClient;
 
-
-    @Singleton
     @Provides
-    public NearbyPlacesApi providePlacesNearbyApi(){
+    @PlacesScope
+    NearbyPlacesApi providePlacesNearbyApi() {
         mRestClient = new RestClient("https://maps.googleapis.com/");
         return mRestClient.createService(NearbyPlacesApi.class);
     }
 
     @Singleton
     @Provides
-    public WeatherApi provideWeatherApi(){
+    WeatherApi provideWeatherApi() {
         mRestClient = new RestClient("https://api.apixu.com/v1/");
         return mRestClient.createService(WeatherApi.class);
     }

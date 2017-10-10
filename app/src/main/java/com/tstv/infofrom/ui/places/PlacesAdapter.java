@@ -25,6 +25,8 @@ public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.PlacesItem
 
     private List<PlacePrediction> mPlacePredictions = new ArrayList<>();
 
+    private boolean isListLoadedEnough;
+
     public PlacesAdapter() {
 
     }
@@ -55,15 +57,23 @@ public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.PlacesItem
         return mPlacePredictions.size();
     }
 
-    boolean setItems(List<PlacePrediction> items) {
+    void setItems(List<PlacePrediction> items) {
         clearList();
         mPlacePredictions.addAll(items);
         if (mPlacePredictions.size() >= 3) {
-            notifyDataSetChanged();
+            setListLoadedEnough(true);
         }
-        return mPlacePredictions.size() == 3;
+        notifyDataSetChanged();
+
     }
 
+    public boolean isListLoadedEnough() {
+        return isListLoadedEnough;
+    }
+
+    public void setListLoadedEnough(boolean listLoadedEnough) {
+        isListLoadedEnough = listLoadedEnough;
+    }
 
     private void clearList() {
         mPlacePredictions.clear();

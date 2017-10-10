@@ -2,7 +2,6 @@ package com.tstv.infofrom.di.module;
 
 import android.app.Application;
 import android.content.Context;
-import android.view.LayoutInflater;
 
 import javax.inject.Singleton;
 
@@ -24,15 +23,8 @@ public class ApplicationModule {
 
     @Singleton
     @Provides
-    public Context provideContext(){
+    Context provideContext() {
         return mApplication;
     }
-
-    @Singleton
-    @Provides
-    LayoutInflater provideLayoutInflater(){
-        return (LayoutInflater) mApplication.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-    }
-
 
 }

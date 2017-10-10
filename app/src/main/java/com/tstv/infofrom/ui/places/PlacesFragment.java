@@ -4,11 +4,11 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Typeface;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -28,9 +28,8 @@ import com.tstv.infofrom.MyApplication;
 import com.tstv.infofrom.R;
 import com.tstv.infofrom.common.google.GoogleServicesHelper;
 import com.tstv.infofrom.common.utils.Utils;
-import com.tstv.infofrom.di.component.DaggerGoogleServicesComponent;
-import com.tstv.infofrom.di.component.GoogleServicesComponent;
-import com.tstv.infofrom.di.module.GoogleServicesModule;
+import com.tstv.infofrom.model.places.PlacePrediction;
+import com.tstv.infofrom.rest.api.NearbyPlacesApi;
 import com.tstv.infofrom.ui.base.BaseFragment;
 import com.tstv.infofrom.ui.base.BasePresenter;
 
@@ -61,7 +60,8 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
     @BindView(R.id.tv_places_recommendations)
     TextView tv_text_above_rv;
 
-    protected ProgressBar mProgressBar;
+    @BindView(R.id.progress_bar_recy_view)
+    ProgressBar pb_recycler_view;
 
     @InjectPresenter
     PlacesPresenter mPlacesPresenter;
@@ -69,36 +69,41 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
     @Inject
     PlacesAdapter mPlacesAdapter;
 
-    //  @Inject
-    private LinearLayoutManager mLayoutManager;
+    @Inject
+    NearbyPlacesApi mNearbyPlacesApi;
+
+    @Inject
+    GoogleServicesHelper mGoogleServicesHelper;
+
+    @Inject
+    LinearLayoutManager mLayoutManager;
+
+    private Typeface mBoldItalicFont;
+
+    protected ProgressBar mProgressBar;
 
     private static boolean isGooglePlayServicesAvailable;
 
     private final String[] locationPermission = {
             Manifest.permission.ACCESS_FINE_LOCATION};
 
-    @Inject
-    GoogleServicesHelper mGoogleServicesHelper;
-
-    private static GoogleServicesComponent mGoogleServicesComponent;
-
     private boolean isInternetIsAvailable;
+
+    boolean isGooglePlayServicesConnected;
+
+    private boolean isLocationDataAlreadyUploaded;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mGoogleServicesComponent = DaggerGoogleServicesComponent.builder()
-                .googleServicesModule(new GoogleServicesModule(PlacesFragment.this, getBaseActivity()))
-                .build();
-        MyApplication.getApplicationComponent().inject(this);
-        getGoogleServicesComponent().inject(this);
+        MyApplication.get().plusFragmentComponent(this, getBaseActivity()).inject(this);
 
         isInternetIsAvailable = Utils.isNetworkAvailableAndConnected(getContext());
 
         if (isInternetIsAvailable) {
             mGoogleServicesHelper.connect();
-            mPlacesPresenter.loadVariables();
-        }else {
+            mPlacesPresenter.loadVariables(mPlacesAdapter, mGoogleServicesHelper, mNearbyPlacesApi);
+        } else {
             Toast.makeText(getContext(), "Internet is not available", Toast.LENGTH_SHORT).show();
         }
     }
@@ -110,10 +115,9 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
         isGooglePlayServicesAvailable = false;
         ButterKnife.bind(this, view);
 
-        mLayoutManager = new LinearLayoutManager(getBaseActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mPlacesAdapter);
-
+        tv_places_title.setTypeface(getBoldItalicFont());
         mProgressBar = getBaseActivity().getProgressBar();
 
         mPlacesPresenter.loadStart();
@@ -122,7 +126,7 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
             @Override
             public boolean onQueryTextSubmit(String query) {
                 mPlacesPresenter.getInputFromUser(query);
-                mPlacesPresenter.loadData(BasePresenter.ProgressType.TextAutoComplete);
+                mPlacesPresenter.loadData(BasePresenter.ProgressType.TextAutoComplete, isLocationDataAlreadyUploaded);
                 mSearchView.clearFocus();
                 return true;
             }
@@ -133,11 +137,9 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
             }
 
         });
-
-        mSearchView.setOnSearchClickListener(v -> tv_text_above_rv.setText("Search results"));
-
+        mSearchView.setOnSearchClickListener(v -> tv_text_above_rv.setText(R.string.text_above_rv_search_res));
         mSearchView.setOnCloseListener(() -> {
-            tv_text_above_rv.setText("Recommendations");
+            tv_text_above_rv.setText(R.string.text_above_rv_default_data);
             mPlacesPresenter.setNearbyPlaces();
             mSearchView.clearFocus();
             return true;
@@ -149,6 +151,7 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
     public void onDestroy() {
         super.onDestroy();
         mGoogleServicesHelper.disconnect();
+        MyApplication.get().clearFragmentComponent();
     }
 
     @Override
@@ -178,6 +181,7 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
     @Override
     public void onConnected() {
         isGooglePlayServicesAvailable = true;
+        isGooglePlayServicesConnected = true;
         Toast.makeText(getBaseActivity(), "Google Services is Available now", Toast.LENGTH_SHORT).show();
         if (ActivityCompat.checkSelfPermission(getBaseActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(locationPermission, REQUEST_LOCATION_PERMISSIONS);
@@ -199,6 +203,8 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
     @Override
     public void onDisconnected() {
         isGooglePlayServicesAvailable = false;
+        isGooglePlayServicesConnected = false;
+        isLocationDataAlreadyUploaded = false;
         Toast.makeText(getBaseActivity(), "Google Services is not Available now", Toast.LENGTH_SHORT).show();
     }
 
@@ -230,11 +236,31 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
     @Override
     public void showDataProgress() {
         mProgressBar.setVisibility(View.VISIBLE);
+        iv_places_image_title.setVisibility(View.GONE);
+        tv_text_above_rv.setVisibility(View.GONE);
+        mSearchView.setVisibility(View.GONE);
+        tv_places_title.setVisibility(View.GONE);
     }
 
     @Override
     public void hideDataProgress() {
         mProgressBar.setVisibility(View.GONE);
+        iv_places_image_title.setVisibility(View.VISIBLE);
+        tv_text_above_rv.setVisibility(View.VISIBLE);
+        mSearchView.setVisibility(View.VISIBLE);
+        tv_places_title.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void showRecyclerViewProgress() {
+        pb_recycler_view.setVisibility(View.VISIBLE);
+        mRecyclerView.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void hiderRecyclerViewProgress() {
+        pb_recycler_view.setVisibility(View.GONE);
+        mRecyclerView.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -242,38 +268,20 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
         Toast.makeText(getBaseActivity(), message, Toast.LENGTH_SHORT).show();
     }
 
-    private void setCurrentLocationData(Location location) {
+    private void getLocationData(Location location) {
         Double[] coordinates = {location.getLatitude(), location.getLongitude()};
-        String city = Utils.getCityFromLatLng(coordinates, getContext());
         MyApplication.setCurrentLtdLng(coordinates);
-        tv_places_title.setText(city);
-        new GetCityPhotoAsyncTask().execute(city);
+        String city = Utils.getCityFromLatLng(coordinates, getContext());
+        MyApplication.setCurrentCity(city);
     }
 
-    class GetCityPhotoAsyncTask extends AsyncTask<String, Void, String> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected String doInBackground(String... params) {
-            return Utils.getPhotoFromBingAPI(params[0]);
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-            Glide.with(getContext())
-                    .load(s)
-                    .into(iv_places_image_title);
-        }
-    }
-
-
-    public static GoogleServicesComponent getGoogleServicesComponent() {
-        return mGoogleServicesComponent;
+    @Override
+    public void setLocationData(PlacePrediction data) {
+        tv_places_title.setText(data.getPlaceName());
+        Glide.with(getContext())
+                .load(data.getImageUrl())
+                .into(iv_places_image_title);
+        isLocationDataAlreadyUploaded = true;
     }
 
     public static boolean isGoogleServicesAvailable() {
@@ -290,8 +298,8 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
             locationManager.requestSingleUpdate(criteria, new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
-                    setCurrentLocationData(location);
-                    mPlacesPresenter.loadData(BasePresenter.ProgressType.DataProgress);
+                    getLocationData(location);
+                    mPlacesPresenter.loadData(BasePresenter.ProgressType.DataProgress, isLocationDataAlreadyUploaded);
                 }
 
                 @Override
@@ -308,5 +316,9 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
                 }
             }, null);
         }
+    }
+
+    private Typeface getBoldItalicFont() {
+        return Typeface.createFromAsset(getActivity().getAssets(), "Roboto_BoldItalic.ttf");
     }
 }
