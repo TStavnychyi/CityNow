@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">InfoFrom</string>
+    <string name="text_above_rv_default_data">Nearby places</string>
+    <string name="text_above_rv_search_res">Search results</string>
 
 </resources>

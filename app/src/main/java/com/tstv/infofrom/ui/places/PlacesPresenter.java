@@ -2,6 +2,7 @@ package com.tstv.infofrom.ui.places;
 
 import android.graphics.Bitmap;
 
+import com.arellomobile.mvp.InjectViewState;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.AutocompleteFilter;
@@ -22,8 +23,6 @@ import com.tstv.infofrom.ui.base.BasePresenter;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -32,6 +31,7 @@ import io.reactivex.schedulers.Schedulers;
  * Created by tstv on 22.09.2017.
  */
 
+@InjectViewState
 public class PlacesPresenter extends BasePresenter<PlacesView> {
 
     private static final String TAG = PlacesPresenter.class.getSimpleName();
@@ -42,16 +42,17 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
 
     private boolean isLoading;
 
+    private boolean isListLoadedEnough;
+
     private List<PlacePrediction> mSearchViewPlaces = new ArrayList<>();
     private List<PlacePrediction> mNearbyPlaces = new ArrayList<>();
 
-    @Inject
     PlacesAdapter mPlacesAdapter;
 
-    @Inject
+
     GoogleServicesHelper mGoogleServicesHelper;
 
-    @Inject
+
     NearbyPlacesApi mNearbyPlacesApi;
 
     private AutocompleteFilter filter = new AutocompleteFilter.Builder()
@@ -60,34 +61,67 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
 
     private LatLngBounds mLatLngBounds;
 
-    public PlacesPresenter() {
+    void loadVariables(PlacesAdapter adapter, GoogleServicesHelper googleServicesHelper, NearbyPlacesApi nearbyPlacesApi) {
+        mPlacesAdapter = adapter;
+        mGoogleServicesHelper = googleServicesHelper;
+        mNearbyPlacesApi = nearbyPlacesApi;
     }
 
-    void loadVariables() {
-        PlacesFragment.getGoogleServicesComponent().inject(this);
-    }
-
-    void loadData(ProgressType progressType) {
+    void loadData(ProgressType progressType, boolean isLocationDataAlreadyLoaded) {
+        final int[] i = {0};
+        if (!isLocationDataAlreadyLoaded) {
+            createLocationDataObservable()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .doOnSubscribe(disposable -> onLoadingStart(progressType))
+                    .doFinally(() -> onLoadingFinish(progressType))
+                    .subscribe(locationData -> {
+                        getViewState().setLocationData(locationData);
+                    }, error -> {
+                        error.printStackTrace();
+                        onLoadingFailed(error);
+                    });
+        }
 
         switch (progressType) {
             case DataProgress:
-                getNearbyPlaces()
+                i[0] = 0;
+                createNearbyPlacesDataObservable()
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
+                        .doOnSubscribe(disposable -> {
+                                    if (isLocationDataAlreadyLoaded)
+                                        showRecyclerViewProgressBar();
+                                }
+                        )
                         .subscribe(items -> {
+                            i[0]++;
                             mSearchViewPlaces.add(items);
                             mNearbyPlaces.add(items);
                             mPlacesAdapter.setItems(mSearchViewPlaces);
+                            if (mPlacesAdapter.isListLoadedEnough()) {
+                                hideRecyclerViewProgressBar();
+                            }
 
                         });
                 break;
             case TextAutoComplete:
-                createLoadObservable()
+                i[0] = 0;
+                createSearchDataObservable()
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
+                        .doOnSubscribe(disposable -> {
+                                    if (isLocationDataAlreadyLoaded)
+                                        showRecyclerViewProgressBar();
+                                }
+                        )
                         .subscribe(obj -> {
+                            i[0]++;
                             mSearchViewPlaces.add(obj);
                             mPlacesAdapter.setItems(mSearchViewPlaces);
+                            if (mPlacesAdapter.isListLoadedEnough()) {
+                                hideRecyclerViewProgressBar();
+                            }
                         });
                 break;
 
@@ -95,7 +129,17 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
 
     }
 
-    private Observable<PlacePrediction> getNearbyPlaces() {
+    Observable<PlacePrediction> createLocationDataObservable() {
+        String currentCity = MyApplication.getCurrentCity();
+        if (currentCity == null && currentCity.isEmpty()) {
+            return null;
+        }
+        return Observable.just(currentCity)
+                .flatMap(city -> Observable.just(Utils.getPhotoFromBingAPI(city)))
+                .map((imageUrl) -> new PlacePrediction(currentCity, imageUrl));
+    }
+
+    private Observable<PlacePrediction> createNearbyPlacesDataObservable() {
         String currentLatLng = Utils.getStringLatLngFromDouble(MyApplication.getCurrentLtdLng());
         int radius = 5000;
         String placesType = "cafe";
@@ -110,7 +154,7 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
     }
 
 
-    private Observable<PlacePrediction> createLoadObservable() {
+    private Observable<PlacePrediction> createSearchDataObservable() {
         isLoading = PlacesFragment.isGoogleServicesAvailable();
         mLatLngBounds = Utils.getLatLngBoundsFromDouble(MyApplication.getCurrentLtdLng());
         return Observable.create(sub -> {
@@ -178,6 +222,14 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
     public void onLoadingFinish(ProgressType progressType) {
         isLoading = false;
         hideProgress(progressType);
+    }
+
+    private void hideRecyclerViewProgressBar() {
+        getViewState().hiderRecyclerViewProgress();
+    }
+
+    private void showRecyclerViewProgressBar() {
+        getViewState().showRecyclerViewProgress();
     }
 
     @Override
