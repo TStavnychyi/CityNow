@@ -66,7 +66,7 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
         mGoogleServicesHelper = googleServicesHelper;
         mNearbyPlacesApi = nearbyPlacesApi;
     }
-
+  
     void loadData(ProgressType progressType, boolean isLocationDataAlreadyLoaded) {
         final int[] i = {0};
         if (!isLocationDataAlreadyLoaded) {
@@ -75,6 +75,7 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
                     .observeOn(AndroidSchedulers.mainThread())
                     .doOnSubscribe(disposable -> onLoadingStart(progressType))
                     .doFinally(() -> onLoadingFinish(progressType))
+
                     .subscribe(locationData -> {
                         getViewState().setLocationData(locationData);
                     }, error -> {
@@ -138,7 +139,7 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
                 .flatMap(city -> Observable.just(Utils.getPhotoFromBingAPI(city)))
                 .map((imageUrl) -> new PlacePrediction(currentCity, imageUrl));
     }
-
+  
     private Observable<PlacePrediction> createNearbyPlacesDataObservable() {
         String currentLatLng = Utils.getStringLatLngFromDouble(MyApplication.getCurrentLtdLng());
         int radius = 5000;

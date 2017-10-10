@@ -48,6 +48,7 @@
             app:queryHint="Find your place"
             app:defaultQueryHint="Find your place"
             android:background="@drawable/my_search_view_places"
+
             android:visibility="gone"
             />
 
