@@ -16,7 +16,6 @@ public class MainPresenter extends MvpPresenter<MainView> {
     @Inject
     MyFragmentManager mMyFragmentManager;
 
-
     public MainPresenter(){
         MyApplication.getApplicationComponent().inject(this);
     }

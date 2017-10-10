@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Typeface;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -27,10 +28,8 @@ import com.tstv.infofrom.MyApplication;
 import com.tstv.infofrom.R;
 import com.tstv.infofrom.common.google.GoogleServicesHelper;
 import com.tstv.infofrom.common.utils.Utils;
-import com.tstv.infofrom.di.component.DaggerGoogleServicesComponent;
-import com.tstv.infofrom.di.component.GoogleServicesComponent;
-import com.tstv.infofrom.di.module.GoogleServicesModule;
 import com.tstv.infofrom.model.places.PlacePrediction;
+import com.tstv.infofrom.rest.api.NearbyPlacesApi;
 import com.tstv.infofrom.ui.base.BaseFragment;
 import com.tstv.infofrom.ui.base.BasePresenter;
 
@@ -63,29 +62,36 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
 
     @BindView(R.id.progress_bar_recy_view)
     ProgressBar pb_recycler_view;
-
-    protected ProgressBar mProgressBar;
-
+  
     @InjectPresenter
     PlacesPresenter mPlacesPresenter;
 
     @Inject
     PlacesAdapter mPlacesAdapter;
 
-    //  @Inject
-    private LinearLayoutManager mLayoutManager;
+    @Inject
+    NearbyPlacesApi mNearbyPlacesApi;
+
+    @Inject
+    GoogleServicesHelper mGoogleServicesHelper;
+
+    @Inject
+    LinearLayoutManager mLayoutManager;
+
+    private Typeface mBoldItalicFont;
+
+    protected ProgressBar mProgressBar;
 
     private static boolean isGooglePlayServicesAvailable;
 
     private final String[] locationPermission = {
             Manifest.permission.ACCESS_FINE_LOCATION};
 
-    @Inject
-    GoogleServicesHelper mGoogleServicesHelper;
-
-    private static GoogleServicesComponent mGoogleServicesComponent;
-
     private boolean isInternetIsAvailable;
+
+    boolean isGooglePlayServicesConnected;
+
+    private boolean isLocationDataAlreadyUploaded;
 
     boolean isGooglePlayServicesConnected;
 
@@ -94,17 +100,13 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mGoogleServicesComponent = DaggerGoogleServicesComponent.builder()
-                .googleServicesModule(new GoogleServicesModule(PlacesFragment.this, getBaseActivity()))
-                .build();
-        MyApplication.getApplicationComponent().inject(this);
-        getGoogleServicesComponent().inject(this);
+        MyApplication.get().plusFragmentComponent(this, getBaseActivity()).inject(this);
 
         isInternetIsAvailable = Utils.isNetworkAvailableAndConnected(getContext());
 
         if (isInternetIsAvailable) {
             mGoogleServicesHelper.connect();
-            mPlacesPresenter.loadVariables();
+            mPlacesPresenter.loadVariables(mPlacesAdapter, mGoogleServicesHelper, mNearbyPlacesApi);
         } else {
             Toast.makeText(getContext(), "Internet is not available", Toast.LENGTH_SHORT).show();
         }
@@ -117,10 +119,9 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
         isGooglePlayServicesAvailable = false;
         ButterKnife.bind(this, view);
 
-        mLayoutManager = new LinearLayoutManager(getBaseActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mPlacesAdapter);
-
+        tv_places_title.setTypeface(getBoldItalicFont());
         mProgressBar = getBaseActivity().getProgressBar();
 
         mPlacesPresenter.loadStart();
@@ -140,9 +141,7 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
             }
 
         });
-
         mSearchView.setOnSearchClickListener(v -> tv_text_above_rv.setText(R.string.text_above_rv_search_res));
-
         mSearchView.setOnCloseListener(() -> {
             tv_text_above_rv.setText(R.string.text_above_rv_default_data);
             mPlacesPresenter.setNearbyPlaces();
@@ -156,6 +155,7 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
     public void onDestroy() {
         super.onDestroy();
         mGoogleServicesHelper.disconnect();
+        MyApplication.get().clearFragmentComponent();
     }
 
     @Override
@@ -288,11 +288,6 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
         isLocationDataAlreadyUploaded = true;
     }
 
-
-    public static GoogleServicesComponent getGoogleServicesComponent() {
-        return mGoogleServicesComponent;
-    }
-
     public static boolean isGoogleServicesAvailable() {
         return isGooglePlayServicesAvailable;
     }
@@ -325,5 +320,9 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
                 }
             }, null);
         }
+    }
+
+    private Typeface getBoldItalicFont() {
+        return Typeface.createFromAsset(getActivity().getAssets(), "Roboto_BoldItalic.ttf");
     }
 }

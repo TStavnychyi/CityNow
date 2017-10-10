@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
     >
-    
+
     <RelativeLayout
         android:id="@+id/rel_head"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        
+
         <ImageView
             android:id="@+id/iv_places_image_title"
             android:layout_width="match_parent"
@@ -28,7 +28,7 @@
             android:textStyle="bold"
             android:visibility="gone"
             />
-        
+
     </RelativeLayout>
 
     <RelativeLayout
@@ -47,6 +47,8 @@
             android:layout_height="wrap_content"
             app:queryHint="Find your place"
             app:defaultQueryHint="Find your place"
+            android:background="@drawable/my_search_view_places"
+
             android:visibility="gone"
             />
 

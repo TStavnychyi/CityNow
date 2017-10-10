@@ -23,8 +23,6 @@ import com.tstv.infofrom.ui.base.BasePresenter;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -49,13 +47,12 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
     private List<PlacePrediction> mSearchViewPlaces = new ArrayList<>();
     private List<PlacePrediction> mNearbyPlaces = new ArrayList<>();
 
-    @Inject
     PlacesAdapter mPlacesAdapter;
 
-    @Inject
+
     GoogleServicesHelper mGoogleServicesHelper;
 
-    @Inject
+
     NearbyPlacesApi mNearbyPlacesApi;
 
     private AutocompleteFilter filter = new AutocompleteFilter.Builder()
@@ -64,24 +61,21 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
 
     private LatLngBounds mLatLngBounds;
 
-    public PlacesPresenter() {
+    void loadVariables(PlacesAdapter adapter, GoogleServicesHelper googleServicesHelper, NearbyPlacesApi nearbyPlacesApi) {
+        mPlacesAdapter = adapter;
+        mGoogleServicesHelper = googleServicesHelper;
+        mNearbyPlacesApi = nearbyPlacesApi;
     }
-
-    void loadVariables() {
-        PlacesFragment.getGoogleServicesComponent().inject(this);
-    }
-
+  
     void loadData(ProgressType progressType, boolean isLocationDataAlreadyLoaded) {
         final int[] i = {0};
         if (!isLocationDataAlreadyLoaded) {
-            onCreateLocationDataObservable()
+            createLocationDataObservable()
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .doOnSubscribe(disposable -> onLoadingStart(progressType))
-                    .doFinally(() -> {
-                        onLoadingFinish(progressType);
-                        showRecyclerViewProgressBar();
-                    })
+                    .doFinally(() -> onLoadingFinish(progressType))
+
                     .subscribe(locationData -> {
                         getViewState().setLocationData(locationData);
                     }, error -> {
@@ -93,9 +87,14 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
         switch (progressType) {
             case DataProgress:
                 i[0] = 0;
-                getNearbyPlaces()
+                createNearbyPlacesDataObservable()
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
+                        .doOnSubscribe(disposable -> {
+                                    if (isLocationDataAlreadyLoaded)
+                                        showRecyclerViewProgressBar();
+                                }
+                        )
                         .subscribe(items -> {
                             i[0]++;
                             mSearchViewPlaces.add(items);
@@ -109,9 +108,14 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
                 break;
             case TextAutoComplete:
                 i[0] = 0;
-                createLoadObservable()
+                createSearchDataObservable()
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
+                        .doOnSubscribe(disposable -> {
+                                    if (isLocationDataAlreadyLoaded)
+                                        showRecyclerViewProgressBar();
+                                }
+                        )
                         .subscribe(obj -> {
                             i[0]++;
                             mSearchViewPlaces.add(obj);
@@ -126,7 +130,7 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
 
     }
 
-    Observable<PlacePrediction> onCreateLocationDataObservable() {
+    Observable<PlacePrediction> createLocationDataObservable() {
         String currentCity = MyApplication.getCurrentCity();
         if (currentCity == null && currentCity.isEmpty()) {
             return null;
@@ -135,8 +139,8 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
                 .flatMap(city -> Observable.just(Utils.getPhotoFromBingAPI(city)))
                 .map((imageUrl) -> new PlacePrediction(currentCity, imageUrl));
     }
-
-    private Observable<PlacePrediction> getNearbyPlaces() {
+  
+    private Observable<PlacePrediction> createNearbyPlacesDataObservable() {
         String currentLatLng = Utils.getStringLatLngFromDouble(MyApplication.getCurrentLtdLng());
         int radius = 5000;
         String placesType = "cafe";
@@ -151,7 +155,7 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
     }
 
 
-    private Observable<PlacePrediction> createLoadObservable() {
+    private Observable<PlacePrediction> createSearchDataObservable() {
         isLoading = PlacesFragment.isGoogleServicesAvailable();
         mLatLngBounds = Utils.getLatLngBoundsFromDouble(MyApplication.getCurrentLtdLng());
         return Observable.create(sub -> {
