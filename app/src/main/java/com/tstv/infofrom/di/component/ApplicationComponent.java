@@ -3,7 +3,6 @@ package com.tstv.infofrom.di.component;
 import android.content.Context;
 
 import com.tstv.infofrom.di.module.ApplicationModule;
-import com.tstv.infofrom.di.module.ManagerModule;
 import com.tstv.infofrom.di.module.RestModule;
 import com.tstv.infofrom.ui.base.BaseActivity;
 import com.tstv.infofrom.ui.base.MainPresenter;
@@ -18,17 +17,16 @@ import dagger.Component;
  */
 
 @Singleton
-@Component (
-        modules = {ApplicationModule.class, ManagerModule.class, RestModule.class})
+@Component(
+        modules = {ApplicationModule.class, RestModule.class})
 public interface ApplicationComponent {
 
-  //  @ApplicationContext
-  Context context();
+    //  @ApplicationContext
+    Context context();
 
-  //Targets
-
+    //Targets
     //application
-  //   void inject(MyApplication application);
+    //   void inject(MyApplication application);
 
     //activities
     void inject(BaseActivity activity);
@@ -38,11 +36,11 @@ public interface ApplicationComponent {
     //   void inject(BaseFragment fragment);
     //presenters
     void inject(MainPresenter presenter);
+
     void inject(TemperaturePresenter presenter);
-  //  void inject(PlacesPresenter presenter);
+    //  void inject(PlacesPresenter presenter);
 
     //holders
-
 
 
 }

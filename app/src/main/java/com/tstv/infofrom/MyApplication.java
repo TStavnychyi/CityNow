@@ -75,6 +75,10 @@ public class MyApplication extends Application {
         return fragmentComponent;
     }
 
+    public PlaceComponent getPlaceComponent() {
+        return fragmentComponent;
+    }
+
     public void clearFragmentComponent() {
         fragmentComponent = null;
     }

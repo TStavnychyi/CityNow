@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/ll_time_opening"
+              android:layout_width="match_parent"
+              android:layout_height="50dp"
+              android:layout_marginLeft="16dp"
+              android:orientation="horizontal"
+    >
+
+    <ImageView
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="center_vertical"
+        android:src="@drawable/ic_access_time_black_24dp"
+        />
+
+    <TextView
+        android:id="@+id/tv_places_detail_hour_opening"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Opened today 12 - 22"
+        android:textColor="@android:color/black"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="24dp"
+        />
+
+</LinearLayout>

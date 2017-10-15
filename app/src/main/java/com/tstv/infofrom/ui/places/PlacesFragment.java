@@ -16,6 +16,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -107,6 +108,7 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
         if (isInternetIsAvailable) {
             mGoogleServicesHelper.connect();
             mPlacesPresenter.loadVariables(mPlacesAdapter, mGoogleServicesHelper, mNearbyPlacesApi);
+            mPlacesAdapter.setBaseActivity(getBaseActivity());
         } else {
             Toast.makeText(getContext(), "Internet is not available", Toast.LENGTH_SHORT).show();
         }
@@ -154,6 +156,7 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Log.e("TAG", "Destroy");
         mGoogleServicesHelper.disconnect();
         MyApplication.get().clearFragmentComponent();
     }

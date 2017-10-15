@@ -5,6 +5,7 @@ import com.tstv.infofrom.di.module.GoogleServicesModule;
 import com.tstv.infofrom.di.module.RestModule;
 import com.tstv.infofrom.di.scopes.PlacesScope;
 import com.tstv.infofrom.ui.places.PlacesFragment;
+import com.tstv.infofrom.ui.places.detail_places.PlacesDetailFragment;
 
 import dagger.Component;
 
@@ -18,4 +19,6 @@ public interface PlaceComponent {
 
     //Targets
     void inject(PlacesFragment fragment);
+
+    void inject(PlacesDetailFragment fragment);
 }

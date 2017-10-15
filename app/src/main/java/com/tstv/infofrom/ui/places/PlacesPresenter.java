@@ -47,7 +47,7 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
     private List<PlacePrediction> mSearchViewPlaces = new ArrayList<>();
     private List<PlacePrediction> mNearbyPlaces = new ArrayList<>();
 
-    PlacesAdapter mPlacesAdapter;
+    private PlacesAdapter mPlacesAdapter;
 
 
     GoogleServicesHelper mGoogleServicesHelper;
@@ -66,7 +66,7 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
         mGoogleServicesHelper = googleServicesHelper;
         mNearbyPlacesApi = nearbyPlacesApi;
     }
-  
+
     void loadData(ProgressType progressType, boolean isLocationDataAlreadyLoaded) {
         final int[] i = {0};
         if (!isLocationDataAlreadyLoaded) {
@@ -139,7 +139,7 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
                 .flatMap(city -> Observable.just(Utils.getPhotoFromBingAPI(city)))
                 .map((imageUrl) -> new PlacePrediction(currentCity, imageUrl));
     }
-  
+
     private Observable<PlacePrediction> createNearbyPlacesDataObservable() {
         String currentLatLng = Utils.getStringLatLngFromDouble(MyApplication.getCurrentLtdLng());
         int radius = 5000;
@@ -200,7 +200,7 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
         mSearchViewPlaces.clear();
     }
 
-    void setNearbyPlaces(){
+    void setNearbyPlaces() {
         mPlacesAdapter.setItems(mNearbyPlaces);
     }
 

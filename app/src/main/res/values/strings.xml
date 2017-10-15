@@ -2,5 +2,8 @@
     <string name="app_name">InfoFrom</string>
     <string name="text_above_rv_default_data">Nearby places</string>
     <string name="text_above_rv_search_res">Search results</string>
+    <string name="title_rv_google_reviews">Reviews in Google</string>
+
+    <string name="WEB_API_KEY">AIzaSyCMlZedC-qCI3FrVEovQ49Qg3qlD0BhKFs</string>
 
 </resources>
