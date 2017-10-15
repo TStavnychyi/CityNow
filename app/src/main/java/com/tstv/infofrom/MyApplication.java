@@ -33,6 +33,9 @@ public class MyApplication extends Application {
     private static Double[] currentLtdLng;
     private static String currentCity;
 
+    private static String currentCity;
+
+
     @Inject
     PlacesPresenter mPlacesPresenter;
 
@@ -96,3 +99,4 @@ public class MyApplication extends Application {
         MyApplication.currentCity = currentCity;
     }
 }
+

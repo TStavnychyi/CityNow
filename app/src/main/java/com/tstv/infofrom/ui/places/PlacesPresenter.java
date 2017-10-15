@@ -65,9 +65,7 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
         mPlacesAdapter = adapter;
         mGoogleServicesHelper = googleServicesHelper;
         mNearbyPlacesApi = nearbyPlacesApi;
-
     }
-
 
     void loadData(ProgressType progressType, boolean isLocationDataAlreadyLoaded) {
         final int[] i = {0};
@@ -77,6 +75,7 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
                     .observeOn(AndroidSchedulers.mainThread())
                     .doOnSubscribe(disposable -> onLoadingStart(progressType))
                     .doFinally(() -> onLoadingFinish(progressType))
+
                     .subscribe(locationData -> {
                         getViewState().setLocationData(locationData);
                     }, error -> {

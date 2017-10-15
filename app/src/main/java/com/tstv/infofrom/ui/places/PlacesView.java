@@ -14,4 +14,5 @@ public interface PlacesView extends BaseView {
     void showRecyclerViewProgress();
 
     void hiderRecyclerViewProgress();
+
 }

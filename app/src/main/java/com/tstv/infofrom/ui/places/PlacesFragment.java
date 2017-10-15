@@ -63,7 +63,7 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
 
     @BindView(R.id.progress_bar_recy_view)
     ProgressBar pb_recycler_view;
-
+  
     @InjectPresenter
     PlacesPresenter mPlacesPresenter;
 
@@ -89,6 +89,10 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
             Manifest.permission.ACCESS_FINE_LOCATION};
 
     private boolean isInternetIsAvailable;
+
+    boolean isGooglePlayServicesConnected;
+
+    private boolean isLocationDataAlreadyUploaded;
 
     boolean isGooglePlayServicesConnected;
 
