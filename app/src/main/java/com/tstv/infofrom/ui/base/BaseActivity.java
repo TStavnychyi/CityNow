@@ -2,17 +2,12 @@ package com.tstv.infofrom.ui.base;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.annotation.LayoutRes;
-import android.util.Log;
-import android.widget.FrameLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.widget.ProgressBar;
 
 import com.arellomobile.mvp.MvpAppCompatActivity;
-import com.tstv.infofrom.MyApplication;
 import com.tstv.infofrom.R;
-import com.tstv.infofrom.common.manager.MyFragmentManager;
-
-import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -29,29 +24,29 @@ public abstract class BaseActivity extends MvpAppCompatActivity {
     @BindView(R.id.progress_bar)
     protected ProgressBar mProgressBar;
 
-    @Inject
-    MyFragmentManager mMyFragmentManager;
+    protected abstract Fragment createFragment();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base);
-        Log.e("TAG", "BaseActivity");
 
         ButterKnife.bind(this);
 
-        MyApplication.getApplicationComponent().inject(this);
+        FragmentManager fm = getSupportFragmentManager();
+        Fragment fragment = fm.findFragmentById(R.id.main_wrapper);
 
-        FrameLayout parent = (FrameLayout) findViewById(R.id.main_wrapper);
-        getLayoutInflater().inflate(getMainContentLayout(), parent);
+        if (fragment == null) {
+            fragment = createFragment();
+            fm.beginTransaction()
+                    .add(R.id.main_wrapper, fragment)
+                    .commit();
+        }
 
     }
     public ProgressBar getProgressBar() {
         return mProgressBar;
     }
-
-    @LayoutRes
-    protected abstract int getMainContentLayout();
 
     public void fragmentOnScreen(BaseFragment baseFragment) {
         setToolbarTitle(baseFragment.createToolbarTitle(this));
@@ -61,27 +56,6 @@ public abstract class BaseActivity extends MvpAppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(title);
         }
-    }
-
-    public void setContent(BaseFragment fragment) {
-        mMyFragmentManager.setFragment(this, fragment, R.id.main_wrapper);
-    }
-
-    public void addContent(BaseFragment fragment) {
-        mMyFragmentManager.addFragment(this, fragment, R.id.main_wrapper);
-    }
-
-    public boolean removeCurrentFragment() {
-        return mMyFragmentManager.removeCurrentFragment(this);
-    }
-
-    public boolean removeFragment(BaseFragment fragment) {
-        return mMyFragmentManager.removeFragment(this, fragment);
-    }
-
-    @Override
-    public void onBackPressed() {
-        removeCurrentFragment();
     }
 
     public Activity getBaseActivity() {

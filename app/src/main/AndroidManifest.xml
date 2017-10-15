@@ -7,7 +7,6 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
-
     <application
         android:name=".MyApplication"
         android:allowBackup="true"
@@ -15,9 +14,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity
-            android:name=".ui.base.MainActivity"
-            >
+        <activity android:name=".ui.base.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -27,8 +24,10 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDVfpb1cscyULpcJf1oob20pQczWHRFPQE"
-            />
+            android:value="AIzaSyDVfpb1cscyULpcJf1oob20pQczWHRFPQE"/>
+
+        <activity android:name=".ui.places.detail_places.PlacesDetailActivity">
+        </activity>
     </application>
 
 </manifest>

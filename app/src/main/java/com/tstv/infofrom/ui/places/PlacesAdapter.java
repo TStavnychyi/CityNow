@@ -1,5 +1,6 @@
 package com.tstv.infofrom.ui.places;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -9,6 +10,8 @@ import android.widget.TextView;
 
 import com.tstv.infofrom.R;
 import com.tstv.infofrom.model.places.PlacePrediction;
+import com.tstv.infofrom.ui.base.BaseActivity;
+import com.tstv.infofrom.ui.places.detail_places.PlacesDetailActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +30,9 @@ public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.PlacesItem
 
     private boolean isListLoadedEnough;
 
-    public PlacesAdapter() {
+    BaseActivity mBaseActivity;
 
+    public PlacesAdapter() {
     }
 
     @Override
@@ -41,6 +45,7 @@ public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.PlacesItem
     @Override
     public void onBindViewHolder(PlacesItemViewHolder holder, int position) {
         PlacePrediction placePrediction = mPlacePredictions.get(position);
+        holder.bind(placePrediction);
         holder.tv_place_name.setText(placePrediction.getId());
         holder.tv_place_name.setText(placePrediction.getPlaceName());
         holder.tv_place_address.setText(placePrediction.getPlaceDescription());
@@ -67,19 +72,23 @@ public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.PlacesItem
 
     }
 
-    public boolean isListLoadedEnough() {
+    boolean isListLoadedEnough() {
         return isListLoadedEnough;
     }
 
-    public void setListLoadedEnough(boolean listLoadedEnough) {
+    private void setListLoadedEnough(boolean listLoadedEnough) {
         isListLoadedEnough = listLoadedEnough;
+    }
+
+    void setBaseActivity(BaseActivity activity) {
+        mBaseActivity = activity;
     }
 
     private void clearList() {
         mPlacePredictions.clear();
     }
 
-    class PlacesItemViewHolder extends RecyclerView.ViewHolder {
+    class PlacesItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         @BindView(R.id.civ_place_image)
         CircleImageView civ_place_image;
@@ -90,9 +99,22 @@ public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.PlacesItem
         @BindView(R.id.tv_place_address)
         TextView tv_place_address;
 
+        PlacePrediction mPlacePrediction;
+
         PlacesItemViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+            itemView.setOnClickListener(this);
+        }
+
+        void bind(PlacePrediction placePrediction) {
+            mPlacePrediction = placePrediction;
+        }
+
+        @Override
+        public void onClick(View v) {
+            Intent intent = PlacesDetailActivity.newIntent(v.getContext(), mPlacePrediction.getId(), mPlacePrediction.getImageUrl());
+            v.getContext().startActivity(intent);
         }
     }
 }

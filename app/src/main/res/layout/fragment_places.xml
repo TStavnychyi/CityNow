@@ -5,6 +5,13 @@
                 xmlns:app="http://schemas.android.com/apk/res-auto"
     >
 
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/qwer"
+        />
+
     <RelativeLayout
         android:id="@+id/rel_head"
         android:layout_width="match_parent"
@@ -39,6 +46,7 @@
         android:layout_marginRight="16dp"
         android:layout_marginTop="12dp"
         android:layout_below="@id/rel_head"
+
         >
 
         <android.support.v7.widget.SearchView
@@ -76,6 +84,7 @@
             android:layout_height="wrap_content"
             android:text="@string/text_above_rv_default_data"
             android:textSize="18sp"
+            android:textStyle="bold|italic"
             android:visibility="gone"
             android:textColor="@android:color/black"
 

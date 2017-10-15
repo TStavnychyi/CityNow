@@ -42,6 +42,10 @@ public class Utils {
         return isNetworkConnected;
     }
 
+    public static String formatPlacesDetailResponse(String response) {
+        return response.substring(46, response.length() - 1);
+    }
+
     public static String convertDateToTime(String dateToConvert) {
         StringBuilder stringBuilder = new StringBuilder();
         String time = dateToConvert.substring(10);
@@ -65,10 +69,10 @@ public class Utils {
     public static void backgroundImage(int isDay, ImageView imageView){
         switch (isDay){
             case 0:
-                imageView.setImageResource(R.drawable.night_sky);
+                imageView.setImageResource(R.drawable.night_il);
                 break;
             case 1:
-                imageView.setImageResource(R.drawable.day_sky);
+                imageView.setImageResource(R.drawable.day_il);
                 break;
         }
     }

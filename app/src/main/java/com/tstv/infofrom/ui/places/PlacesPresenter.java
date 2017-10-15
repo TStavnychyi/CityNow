@@ -47,7 +47,7 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
     private List<PlacePrediction> mSearchViewPlaces = new ArrayList<>();
     private List<PlacePrediction> mNearbyPlaces = new ArrayList<>();
 
-    PlacesAdapter mPlacesAdapter;
+    private PlacesAdapter mPlacesAdapter;
 
 
     GoogleServicesHelper mGoogleServicesHelper;
@@ -65,7 +65,9 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
         mPlacesAdapter = adapter;
         mGoogleServicesHelper = googleServicesHelper;
         mNearbyPlacesApi = nearbyPlacesApi;
+
     }
+
 
     void loadData(ProgressType progressType, boolean isLocationDataAlreadyLoaded) {
         final int[] i = {0};
@@ -199,7 +201,7 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
         mSearchViewPlaces.clear();
     }
 
-    void setNearbyPlaces(){
+    void setNearbyPlaces() {
         mPlacesAdapter.setItems(mNearbyPlaces);
     }
 

@@ -33,7 +33,6 @@ public class MyApplication extends Application {
     private static Double[] currentLtdLng;
     private static String currentCity;
 
-
     @Inject
     PlacesPresenter mPlacesPresenter;
 
@@ -70,6 +69,10 @@ public class MyApplication extends Application {
                     .applicationComponent(sApplicationComponent)
                     .build();
         }
+        return fragmentComponent;
+    }
+
+    public PlaceComponent getPlaceComponent() {
         return fragmentComponent;
     }
 
