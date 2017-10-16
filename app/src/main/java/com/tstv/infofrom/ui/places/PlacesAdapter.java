@@ -13,6 +13,7 @@ import com.tstv.infofrom.model.places.PlacePrediction;
 import com.tstv.infofrom.ui.base.BaseActivity;
 import com.tstv.infofrom.ui.places.detail_places.PlacesDetailActivity;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -113,7 +114,13 @@ public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.PlacesItem
 
         @Override
         public void onClick(View v) {
-            Intent intent = PlacesDetailActivity.newIntent(v.getContext(), mPlacePrediction.getId(), mPlacePrediction.getImageUrl());
+            byte[] byteArray = null;
+            if (mPlacePrediction.getBitmap() != null) {
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                mPlacePrediction.getBitmap().compress(Bitmap.CompressFormat.PNG, 100, stream);
+                byteArray = stream.toByteArray();
+            }
+            Intent intent = PlacesDetailActivity.newIntent(v.getContext(), mPlacePrediction.getId(), byteArray);
             v.getContext().startActivity(intent);
         }
     }

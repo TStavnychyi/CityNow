@@ -31,7 +31,6 @@ public class MyApplication extends Application {
 
 
     private static Double[] currentLtdLng;
-    private static String currentCity;
 
     private static String currentCity;
 

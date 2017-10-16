@@ -90,9 +90,9 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
 
     private boolean isInternetIsAvailable;
 
-    boolean isGooglePlayServicesConnected;
+    //  boolean isGooglePlayServicesConnected;
 
-    private boolean isLocationDataAlreadyUploaded;
+    //  private boolean isLocationDataAlreadyUploaded;
 
     boolean isGooglePlayServicesConnected;
 

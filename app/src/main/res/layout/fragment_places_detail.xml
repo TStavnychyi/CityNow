@@ -5,84 +5,8 @@
     android:id="@+id/parent_layout_detail_places"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/background_image"
     >
-
-    <android.support.design.widget.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@android:color/white"
-        android:fitsSystemWindows="true"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        >
-
-        <android.support.design.widget.CollapsingToolbarLayout
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/collapsing_toolbar_height"
-            android:fitsSystemWindows="true"
-            app:contentScrim="?attr/colorPrimary"
-            app:expandedTitleMarginBottom="70dp"
-            app:expandedTitleMarginStart="48dp"
-            app:expandedTitleTextAppearance="@android:color/transparent"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed"
-            >
-
-            <ImageView
-                android:id="@+id/iv_places_detail_image"
-                android:layout_width="match_parent"
-                android:layout_height="170dp"
-                android:scaleType="centerCrop"
-                android:src="@drawable/qwer"
-                app:layout_collapseMode="parallax"
-                />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center|bottom"
-                android:layout_marginBottom="20dp"
-                android:orientation="vertical"
-                >
-
-                <TextView
-                    android:id="@+id/tv_places_detail_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:singleLine="true"
-                    android:text="Hamburgeria"
-                    android:textColor="@android:color/black"
-                    android:textSize="18sp"
-                    />
-
-                <RatingBar
-                    android:id="@+id/rating_bar_detail_places"
-                    style="?android:attr/ratingBarStyleSmall"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="6dp"
-                    android:isIndicator="true"
-                    android:numStars="5"
-                    android:rating="3"
-                    android:stepSize="0.1"
-                    />
-
-            </LinearLayout>
-
-
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/detail_places_toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:title="@string/app_name"
-                app:layout_collapseMode="pin"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                />
-
-
-        </android.support.design.widget.CollapsingToolbarLayout>
-
-    </android.support.design.widget.AppBarLayout>
 
     <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -126,5 +50,92 @@
         </LinearLayout>
 
     </android.support.v4.widget.NestedScrollView>
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:fitsSystemWindows="true"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        >
+
+        <android.support.design.widget.CollapsingToolbarLayout
+            android:id="@+id/places_detail_collapsing_toolbar_layout"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/collapsing_toolbar_height"
+            android:fitsSystemWindows="true"
+            app:contentScrim="?attr/colorPrimary"
+            app:expandedTitleMarginBottom="70dp"
+            app:expandedTitleMarginStart="48dp"
+            app:expandedTitleTextAppearance="@android:color/transparent"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            >
+
+            <ImageView
+                android:id="@+id/iv_places_detail_image"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:scaleType="centerCrop"
+                />
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center|bottom"
+                android:layout_marginBottom="20dp"
+                android:orientation="vertical"
+                >
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/civ_place_image"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_gravity="center_horizontal"
+                    app:civ_border_color="@android:color/white"
+                    app:civ_border_width="2dp"
+                    />
+
+                <TextView
+                    android:id="@+id/tv_places_detail_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="6dp"
+                    android:singleLine="true"
+                    android:text="Hamburgeria"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp"
+                    />
+
+                <RatingBar
+                    android:id="@+id/rating_bar_detail_places"
+                    style="?android:attr/ratingBarStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="6dp"
+                    android:isIndicator="true"
+                    android:numStars="5"
+                    android:rating="3"
+                    android:stepSize="0.1"
+                    />
+
+            </LinearLayout>
+
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/detail_places_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:title="@string/app_name"
+                app:layout_collapseMode="pin"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                />
+
+
+        </android.support.design.widget.CollapsingToolbarLayout>
+
+    </android.support.design.widget.AppBarLayout>
 
 </android.support.design.widget.CoordinatorLayout>
