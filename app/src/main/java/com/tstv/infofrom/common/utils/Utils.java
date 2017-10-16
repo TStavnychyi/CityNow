@@ -4,6 +4,7 @@ import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
 import android.net.ConnectivityManager;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -24,6 +25,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import static android.content.Context.CONNECTIVITY_SERVICE;
 
@@ -40,6 +42,46 @@ public class Utils {
         boolean isNetworkConnected = isNetworkAvailable && cm.getActiveNetworkInfo().isConnected();
 
         return isNetworkConnected;
+    }
+
+    public static String updateTime(Date updatedTime) {
+
+        String result;
+        int updated_hour = updatedTime.getHours();
+        int updated_minutes = updatedTime.getMinutes();
+
+        Date current_time = new Date();
+        int current_hour = current_time.getHours();
+        int current_minutes = current_time.getMinutes();
+
+        Log.e("TAG", "updatedTime : " + updatedTime + " , current time" + current_time);
+
+        long diff = current_time.getTime() - updatedTime.getTime();
+        long minutes_diff = TimeUnit.MINUTES.convert(diff, TimeUnit.MILLISECONDS);
+        if (minutes_diff < 60) {
+            return result = minutes_diff + " min ago";
+        } else {
+            long hours_diff = TimeUnit.HOURS.convert(diff, TimeUnit.MILLISECONDS);
+            if (hours_diff > 24) {
+                long days_diff = TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
+                if (days_diff == 1) {
+                    return result = days_diff + " day ago";
+                } else {
+                    return result = days_diff + " days ago";
+                }
+            }
+            if (hours_diff == 1) {
+                return result = hours_diff + " hour ago";
+            } else {
+                return result = hours_diff + " hours ago";
+            }
+        }
+    }
+
+    public static String formatUnixTime(String unixTime) {
+        long time = Long.parseLong(unixTime);
+        Date date = new Date(time * 1000L);
+        return updateTime(date);
     }
 
     public static String formatPlacesDetailResponse(String response) {

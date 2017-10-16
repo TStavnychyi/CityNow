@@ -10,6 +10,4 @@ import com.tstv.infofrom.ui.base.BaseView;
 public interface PlacesDetailView extends BaseView {
 
     void setData(Result result);
-
-    void setPhotoUrl(String url);
 }

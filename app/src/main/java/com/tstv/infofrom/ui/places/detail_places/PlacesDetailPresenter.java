@@ -116,27 +116,32 @@ public class PlacesDetailPresenter extends BasePresenter<PlacesDetailView> {
         List<String> photoReferences = new ArrayList<>();
         int photosSize;
         final int[] elementsLoadedCount = new int[1];
-        if (resultObj.getPhotos().size() > 10) {
-            photosSize = 10;
-        } else {
-            photosSize = resultObj.getPhotos().size();
-        }
-        for (int i = 0; i < photosSize; i++) {
-            photoReferences.add(resultObj.getPhotos().get(i).getPhotoReference());
-        }
-        for (int i = 0; i < photoReferences.size(); i++) {
-            createPhotoFromReferenceObservable(photoReferences.get(i))
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(value -> {
-                        elementsLoadedCount[0]++;
-                        photoUrls.add(value);
-                        if (elementsLoadedCount[0] == photosSize) {
-                            resultObj.setPhotosUrls(photoUrls);
-                            updateObjectInView(resultObj);
-                        }
-                    });
+        if (resultObj.getPhotos() != null) {
+            if (resultObj.getPhotos().size() > 10) {
+                photosSize = 10;
+            } else {
+                photosSize = resultObj.getPhotos().size();
+            }
+            for (int i = 0; i < photosSize; i++) {
+                photoReferences.add(resultObj.getPhotos().get(i).getPhotoReference());
+            }
+            for (int i = 0; i < photoReferences.size(); i++) {
+                createPhotoFromReferenceObservable(photoReferences.get(i))
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(value -> {
+                            elementsLoadedCount[0]++;
+                            photoUrls.add(value);
+                            if (elementsLoadedCount[0] == photosSize) {
+                                resultObj.setPhotosUrls(photoUrls);
+                                updateObjectInView(resultObj);
+                            }
+                        });
 
+            }
+        } else {
+            updateObjectInView(resultObj);
+            Log.e("TAG", "No photos in this place");
         }
     }
 

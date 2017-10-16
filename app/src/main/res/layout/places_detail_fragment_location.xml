@@ -43,8 +43,7 @@
             android:id="@+id/iv_places_detail_location_map_icon"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:src="@drawable/day_il"
-            android:scaleType="centerCrop"
+            android:src="@drawable/google_maps_icon"
             />
 
     </RelativeLayout>

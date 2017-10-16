@@ -130,7 +130,7 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
 
     }
 
-    Observable<PlacePrediction> createLocationDataObservable() {
+    private Observable<PlacePrediction> createLocationDataObservable() {
         String currentCity = MyApplication.getCurrentCity();
         if (currentCity == null && currentCity.isEmpty()) {
             return null;

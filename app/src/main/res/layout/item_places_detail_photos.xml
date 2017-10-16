@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+           android:id="@+id/iv_item_photos"
+           android:layout_width="150dp"
+           android:layout_height="150dp"
+           android:orientation="vertical"
+           android:scaleType="centerCrop"
+           android:layout_marginLeft="6dp"
+           android:layout_marginRight="6dp"
+    >
+
+</ImageView>

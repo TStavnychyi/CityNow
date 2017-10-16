@@ -58,7 +58,9 @@ dependencies {
     compile 'com.google.android.gms:play-services-places:11.0.4'
     compile 'org.jsoup:jsoup:1.10.3'
     compile 'org.greenrobot:eventbus:3.0.0'
+    compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'jp.wasabeef:glide-transformations:3.0.1'
-    // If you want to use the GPU Filters
     compile 'jp.co.cyberagent.android.gpuimage:gpuimage-library:1.4.1'
+    compile 'com.amulyakhare:com.amulyakhare.textdrawable:1.0.1'
+
 }
