@@ -2,7 +2,7 @@ package com.tstv.infofrom.ui.base;
 
 import android.os.Bundle;
 
-import com.tstv.infofrom.ui.temperature.TemperatureFragment;
+import com.tstv.infofrom.ui.weather.WeatherFragment;
 
 public class MainActivity extends BaseActivity implements MainView {
 
@@ -10,7 +10,7 @@ public class MainActivity extends BaseActivity implements MainView {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContent(new TemperatureFragment());
+        setContent(new WeatherFragment());
     }
 
    /* @Override

@@ -1,6 +1,7 @@
 package com.tstv.infofrom.ui.places;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import com.arellomobile.mvp.InjectViewState;
 import com.google.android.gms.common.api.PendingResult;
@@ -86,6 +87,7 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
 
         switch (progressType) {
             case DataProgress:
+                Log.e("TAG", "loadData DataProgress");
                 i[0] = 0;
                 createNearbyPlacesDataObservable()
                         .subscribeOn(Schedulers.io())
@@ -107,6 +109,7 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
                         });
                 break;
             case TextAutoComplete:
+                Log.e("TAG", "loadData TextAutoComplete");
                 i[0] = 0;
                 createSearchDataObservable()
                         .subscribeOn(Schedulers.io())

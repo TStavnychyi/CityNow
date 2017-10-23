@@ -12,7 +12,7 @@ import com.tstv.infofrom.MyApplication;
 import com.tstv.infofrom.R;
 import com.tstv.infofrom.common.manager.MyFragmentManager;
 import com.tstv.infofrom.ui.places.PlacesFragment;
-import com.tstv.infofrom.ui.temperature.TemperatureFragment;
+import com.tstv.infofrom.ui.weather.WeatherFragment;
 
 import javax.inject.Inject;
 
@@ -54,7 +54,7 @@ public abstract class BaseActivity extends MvpAppCompatActivity {
         mBottomNavigationMenu.setOnNavigationItemSelectedListener(item -> {
             switch (item.getItemId()) {
                 case R.id.item_nav_weather:
-                    setContent(new TemperatureFragment());
+                    setContent(new WeatherFragment());
                     Log.e("TAG", "Weather");
                     break;
                 case R.id.item_nav_places:
@@ -72,6 +72,16 @@ public abstract class BaseActivity extends MvpAppCompatActivity {
         getLayoutInflater().inflate(R.layout.activity_main, parent);
 
     }
+
+    public int getStatusBarHeight() {
+        int result = 0;
+        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            result = getResources().getDimensionPixelSize(resourceId);
+        }
+        return result;
+    }
+
     public ProgressBar getProgressBar() {
         return mProgressBar;
     }
