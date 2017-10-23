@@ -6,7 +6,8 @@ import com.tstv.infofrom.di.module.ApplicationModule;
 import com.tstv.infofrom.di.module.RestModule;
 import com.tstv.infofrom.ui.base.BaseActivity;
 import com.tstv.infofrom.ui.base.MainPresenter;
-import com.tstv.infofrom.ui.temperature.TemperaturePresenter;
+import com.tstv.infofrom.ui.weather.WeatherFragment;
+import com.tstv.infofrom.ui.weather.WeatherPresenter;
 
 import javax.inject.Singleton;
 
@@ -30,6 +31,8 @@ public interface ApplicationComponent {
 
     //activities
     void inject(BaseActivity activity);
+
+    void inject(WeatherFragment fragment);
 //    void inject(MainActivity activity);
 
     //fragments
@@ -37,7 +40,7 @@ public interface ApplicationComponent {
     //presenters
     void inject(MainPresenter presenter);
 
-    void inject(TemperaturePresenter presenter);
+    void inject(WeatherPresenter presenter);
     //  void inject(PlacesPresenter presenter);
 
     //holders

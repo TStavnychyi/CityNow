@@ -297,6 +297,7 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
 
 
     private void requestSingleUpdate() throws SecurityException {
+        Log.e("TAG", "requestSingleUpdate");
         final LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
         if (isNetworkEnabled) {

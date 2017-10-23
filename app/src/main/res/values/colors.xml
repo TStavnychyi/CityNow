@@ -4,6 +4,8 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
 
+    <color name="colorBottomNavView">#00BCD4</color>
+
     <color name="colorDivider">#797979</color>
     <color name="color_white_secondary">#f6f6f6</color>
 </resources>
