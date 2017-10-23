@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/item_nav_weather"
+        android:enabled="true"
+        android:icon="@drawable/nav_weather"
+        android:title="@string/nav_menu_weather"
+        app:showAsAction="ifRoom"
+        />
+
+    <item
+        android:id="@+id/item_nav_places"
+        android:enabled="true"
+        android:icon="@drawable/nav_places"
+        android:title="@string/nav_menu_establishments"
+        app:showAsAction="ifRoom"
+        />
+
+    <item
+        android:id="@+id/item_nav_road_traffic"
+        android:enabled="true"
+        android:icon="@drawable/nav_traffic"
+        android:title="@string/nav_menu_road_traffic"
+        app:showAsAction="ifRoom"
+        />
+
+
+</menu>

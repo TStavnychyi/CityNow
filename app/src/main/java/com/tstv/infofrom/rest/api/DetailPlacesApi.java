@@ -14,6 +14,7 @@ public interface DetailPlacesApi {
     @GET("/maps/api/place/details/json")
     Observable<PlacesDetailInfo> get(
             @Query("placeid") String placeId,
+            @Query("language") String language,
             @Query("key") String key
     );
 }

@@ -62,5 +62,6 @@ dependencies {
     compile 'jp.wasabeef:glide-transformations:3.0.1'
     compile 'jp.co.cyberagent.android.gpuimage:gpuimage-library:1.4.1'
     compile 'com.amulyakhare:com.amulyakhare.textdrawable:1.0.1'
-
+    compile 'com.github.aakira:expandable-layout:1.4.2@aar'
+    compile 'com.ms-square:expandableTextView:0.1.4'
 }

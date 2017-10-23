@@ -25,6 +25,7 @@ public class PlacesDetailPhotosAdapter extends RecyclerView.Adapter<PlacesDetail
 
     private Context mContext;
 
+
     public PlacesDetailPhotosAdapter(Context context, List<String> listPhotos) {
         mContext = context;
         mListPhotos = listPhotos;
@@ -39,7 +40,7 @@ public class PlacesDetailPhotosAdapter extends RecyclerView.Adapter<PlacesDetail
 
     @Override
     public void onBindViewHolder(PhotosHolder holder, int position) {
-        Glide.with(mContext).load(mListPhotos.get(position)).into(holder.mImageView);
+        holder.bindView(mListPhotos.get(position));
     }
 
     @Override
@@ -47,14 +48,27 @@ public class PlacesDetailPhotosAdapter extends RecyclerView.Adapter<PlacesDetail
         return mListPhotos.size();
     }
 
-    class PhotosHolder extends RecyclerView.ViewHolder {
+    class PhotosHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         @BindView(R.id.iv_item_photos)
         ImageView mImageView;
 
+        private String photoUrl;
+
         PhotosHolder(View itemView) {
             super(itemView);
+            itemView.setOnClickListener(this);
             ButterKnife.bind(this, itemView);
+        }
+
+        void bindView(String url) {
+            photoUrl = url;
+            Glide.with(mContext).load(url).into(mImageView);
+        }
+
+        @Override
+        public void onClick(View v) {
+            PlacesPhotoDialog.showoPhotoDialog(mContext, photoUrl);
         }
     }
 }

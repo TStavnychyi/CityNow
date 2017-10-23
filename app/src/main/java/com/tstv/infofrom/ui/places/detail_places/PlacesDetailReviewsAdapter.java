@@ -1,8 +1,11 @@
 package com.tstv.infofrom.ui.places.detail_places;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,13 +18,13 @@ import com.amulyakhare.textdrawable.util.ColorGenerator;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.tstv.infofrom.R;
-import com.tstv.infofrom.common.utils.Utils;
 import com.tstv.infofrom.model.places.detail_places.Review;
 
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
@@ -50,23 +53,11 @@ public class PlacesDetailReviewsAdapter extends RecyclerView.Adapter<PlacesDetai
     @Override
     public void onBindViewHolder(ReviewsViewHolder holder, int position) {
         Review reviewObj = mReviewList.get(position);
-
-        String authorName = reviewObj.getAuthorName();
-        String authorIconUrl = reviewObj.getProfilePhotoUrl();
-
-        if (authorIconUrl != null) {
-            Glide.with(mContext).load(authorIconUrl).apply(bitmapTransform(new CircleCrop())).into(holder.iv_profile_icon);
+        if (reviewObj != null) {
+            holder.bindViews(reviewObj);
         } else {
-            ColorGenerator colorGenerator = ColorGenerator.MATERIAL;
-            Drawable roundAuthorIcon = TextDrawable.builder().buildRound(String.valueOf(authorName.charAt(0)), colorGenerator.getRandomColor());
-            holder.iv_profile_icon.setImageDrawable(roundAuthorIcon);
+            Log.e("TAG", "Review Object is null");
         }
-
-        holder.tv_profile_name.setText(authorName);
-        holder.tv_profile_review.setText(reviewObj.getText());
-        holder.rb_profile_rating.setRating(reviewObj.getRating());
-        holder.tv_time_description.setText(Utils.formatUnixTime(String.valueOf(reviewObj.getTime())));
-
 
     }
 
@@ -76,6 +67,8 @@ public class PlacesDetailReviewsAdapter extends RecyclerView.Adapter<PlacesDetai
     }
 
     class ReviewsViewHolder extends RecyclerView.ViewHolder {
+
+        Review mReview;
 
         @BindView(R.id.iv_profile_icon)
         ImageView iv_profile_icon;
@@ -92,9 +85,45 @@ public class PlacesDetailReviewsAdapter extends RecyclerView.Adapter<PlacesDetai
         @BindView(R.id.tv_profile_time_description)
         TextView tv_time_description;
 
+        @OnClick(R.id.iv_profile_icon)
+        public void onIconClick() {
+            openProfile(mReview.getAuthorUrl());
+        }
+
         ReviewsViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+
+        }
+
+        void bindViews(Review reviewObj) {
+            mReview = reviewObj;
+            String authorName = reviewObj.getAuthorName();
+            String authorIconUrl = reviewObj.getProfilePhotoUrl();
+
+            if (authorIconUrl != null) {
+                Glide.with(mContext).load(authorIconUrl).apply(bitmapTransform(new CircleCrop())).into(iv_profile_icon);
+            } else {
+                ColorGenerator colorGenerator = ColorGenerator.MATERIAL;
+                Drawable roundAuthorIcon = TextDrawable.builder().buildRound(String.valueOf(authorName.charAt(0)), colorGenerator.getRandomColor());
+                iv_profile_icon.setImageDrawable(roundAuthorIcon);
+            }
+
+            tv_profile_name.setText(authorName);
+            tv_profile_review.setText(reviewObj.getText());
+            rb_profile_rating.setRating(reviewObj.getRating());
+            tv_time_description.setText(reviewObj.getRelativeTimeDescription());
+
+        }
+
+        void openProfile(String url) {
+            if (url != null) {
+                if (!url.startsWith("http://") && !url.startsWith("https://"))
+                    url = "http://" + url;
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(url));
+                itemView.getContext().startActivity(intent);
+            }
         }
     }
 }

@@ -13,6 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:orientation="vertical"
+        android:clickable="true"
         >
 
         <ImageView
@@ -28,7 +29,7 @@
             android:layout_gravity="center"
             android:text="WEB-SITE"
             android:textColor="@android:color/black"
-            android:textSize="14sp"
+            android:textSize="16sp"
             />
 
     </LinearLayout>
@@ -39,6 +40,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:orientation="vertical"
+        android:clickable="true"
         >
 
         <ImageView
@@ -52,9 +54,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="WEB-SITE"
+            android:text="CALL"
             android:textColor="@android:color/black"
-            android:textSize="14sp"
+            android:textSize="16sp"
             />
 
     </LinearLayout>

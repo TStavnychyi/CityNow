@@ -2,14 +2,41 @@ package com.tstv.infofrom.ui.places.detail_places;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.widget.ProgressBar;
 
-import com.tstv.infofrom.ui.base.BaseActivity;
+import com.arellomobile.mvp.MvpAppCompatActivity;
+import com.tstv.infofrom.R;
+import com.tstv.infofrom.ui.base.MainView;
 
-public class PlacesDetailActivity extends BaseActivity {
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+public class PlacesDetailActivity extends MvpAppCompatActivity implements MainView {
 
     private static final String EXTRA_PLACE_ID = "place_id";
     private static final String EXTRA_PLACE_PHOTO_URL = "place_photo";
+
+    @BindView(R.id.progress_bar_places)
+    ProgressBar mProgressBar;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_places_detail);
+
+        ButterKnife.bind(this);
+
+        String id = getIntent().getStringExtra(EXTRA_PLACE_ID);
+        byte[] byteArray = getIntent().getByteArrayExtra(EXTRA_PLACE_PHOTO_URL);
+        launchFragment(PlacesDetailFragment.newInstance(id, byteArray));
+    }
+
+    public ProgressBar getPlacesProgressBar() {
+        return mProgressBar;
+    }
 
     public static Intent newIntent(Context packageContext, String id, byte[] byteArray) {
         Intent intent = new Intent(packageContext, PlacesDetailActivity.class);
@@ -18,10 +45,15 @@ public class PlacesDetailActivity extends BaseActivity {
         return intent;
     }
 
-    @Override
-    protected Fragment createFragment() {
-        String id = getIntent().getStringExtra(EXTRA_PLACE_ID);
-        byte[] byteArray = getIntent().getByteArrayExtra(EXTRA_PLACE_PHOTO_URL);
-        return PlacesDetailFragment.newInstance(id, byteArray);
+    private void launchFragment(Fragment target) {
+        FragmentManager fm = getSupportFragmentManager();
+        Fragment fragment = fm.findFragmentById(R.id.places_detail_container);
+
+        if (fragment == null) {
+            fragment = target;
+            fm.beginTransaction()
+                    .add(R.id.places_detail_container, fragment)
+                    .commit();
+        }
     }
 }

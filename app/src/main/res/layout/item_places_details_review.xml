@@ -4,6 +4,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp"
                 android:layout_marginTop="16dp"
+                xmlns:expandableTextView="http://schemas.android.com/apk/res-auto"
     >
 
     <ImageView
@@ -62,8 +63,8 @@
             android:layout_below="@id/rb_profile_rating"
             android:layout_marginTop="6dp"
             android:layout_marginRight="16dp"
-            android:text="asdkjasdjasdjasjdasjdasjdjasdjasjdasjdasjda"
             />
+
 
         <View
             android:layout_width="match_parent"

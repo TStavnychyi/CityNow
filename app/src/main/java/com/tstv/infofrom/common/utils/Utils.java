@@ -25,7 +25,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 import static android.content.Context.CONNECTIVITY_SERVICE;
 
@@ -35,7 +34,7 @@ import static android.content.Context.CONNECTIVITY_SERVICE;
 
 public class Utils {
 
-    public static boolean isNetworkAvailableAndConnected(Context context){
+    public static boolean isNetworkAvailableAndConnected(Context context) {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(CONNECTIVITY_SERVICE);
 
         boolean isNetworkAvailable = cm.getActiveNetworkInfo() != null;
@@ -44,45 +43,12 @@ public class Utils {
         return isNetworkConnected;
     }
 
-    public static String updateTime(Date updatedTime) {
-
-        String result;
-        int updated_hour = updatedTime.getHours();
-        int updated_minutes = updatedTime.getMinutes();
-
-        Date current_time = new Date();
-        int current_hour = current_time.getHours();
-        int current_minutes = current_time.getMinutes();
-
-        Log.e("TAG", "updatedTime : " + updatedTime + " , current time" + current_time);
-
-        long diff = current_time.getTime() - updatedTime.getTime();
-        long minutes_diff = TimeUnit.MINUTES.convert(diff, TimeUnit.MILLISECONDS);
-        if (minutes_diff < 60) {
-            return result = minutes_diff + " min ago";
-        } else {
-            long hours_diff = TimeUnit.HOURS.convert(diff, TimeUnit.MILLISECONDS);
-            if (hours_diff > 24) {
-                long days_diff = TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
-                if (days_diff == 1) {
-                    return result = days_diff + " day ago";
-                } else {
-                    return result = days_diff + " days ago";
-                }
-            }
-            if (hours_diff == 1) {
-                return result = hours_diff + " hour ago";
-            } else {
-                return result = hours_diff + " hours ago";
-            }
-        }
+    public static String formatPlaceOpenCloseTime(String timeToFormat) {
+        String res = timeToFormat.substring(0, 2) + ":" + timeToFormat.substring(2, timeToFormat.length());
+        Log.e("TAG", "Formated Time : " + res);
+        return res;
     }
 
-    public static String formatUnixTime(String unixTime) {
-        long time = Long.parseLong(unixTime);
-        Date date = new Date(time * 1000L);
-        return updateTime(date);
-    }
 
     public static String formatPlacesDetailResponse(String response) {
         return response.substring(46, response.length() - 1);
@@ -108,8 +74,8 @@ public class Utils {
         return result;
     }
 
-    public static void backgroundImage(int isDay, ImageView imageView){
-        switch (isDay){
+    public static void backgroundImage(int isDay, ImageView imageView) {
+        switch (isDay) {
             case 0:
                 imageView.setImageResource(R.drawable.night_il);
                 break;
@@ -119,18 +85,18 @@ public class Utils {
         }
     }
 
-    public static LatLngBounds getLatLngBoundsFromDouble(Double[] arg){
+    public static LatLngBounds getLatLngBoundsFromDouble(Double[] arg) {
         LatLng latLng = new LatLng(arg[0], arg[1]);
         return new LatLngBounds.Builder()
                 .include(latLng)
                 .build();
     }
 
-    public static String getStringLatLngFromDouble(Double[] arg){
+    public static String getStringLatLngFromDouble(Double[] arg) {
         return arg[0] + "," + arg[1];
     }
 
-    public static String getCityFromLatLng(Double[] arg, Context context){
+    public static String getCityFromLatLng(Double[] arg, Context context) {
         Geocoder gcd = new Geocoder(context, Locale.getDefault());
         String city = null;
         try {
@@ -142,24 +108,24 @@ public class Utils {
         return city;
     }
 
-    public static String getPhotoFromBingAPI(String city){
+    public static String getPhotoFromBingAPI(String city) {
         String url = "https://api.cognitive.microsoft.com/bing/v5.0/images/search?q=" + city +
                 "&count=1"
-                +"&mkt=en-us"
+                + "&mkt=en-us"
                 + "&size=Large"
-                +"&imageType=Photo"
+                + "&imageType=Photo"
                 + "&safeSearch=Off";
 
         String result = performGetCallBingImageSearch(url);
         return parseJsonBing(result);
     }
 
-    private static String parseJsonBing(String json){
+    private static String parseJsonBing(String json) {
         String photoUrl = null;
         try {
             JSONObject jsonObject = new JSONObject(json);
             JSONArray images = jsonObject.getJSONArray("value");
-            for (int i = 0; i < images.length(); i++){
+            for (int i = 0; i < images.length(); i++) {
                 JSONObject imageResult = images.getJSONObject(i);
 
                 photoUrl = imageResult.getString("contentUrl");
@@ -174,9 +140,8 @@ public class Utils {
         //IF GETTING ERROR,FIRST OF ALL CHECK IS API KEY EXPIRED!!!!
         String aPI_KEY = "2f0f58921f614cf4bf2aa2ccb47f6b89";
         StringBuffer response = null;
-        try
-        {
-            URL               obj = new URL(url);
+        try {
+            URL obj = new URL(url);
             HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
             con.setConnectTimeout(25000);
@@ -190,17 +155,14 @@ public class Utils {
             System.out.println("Response Code : " + responseCode);
 
             BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            String         inputLine;
+            String inputLine;
             response = new StringBuffer();
 
-            while ((inputLine = in.readLine()) != null)
-            {
+            while ((inputLine = in.readLine()) != null) {
                 response.append(inputLine);
             }
             in.close();
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
             return "";
         }

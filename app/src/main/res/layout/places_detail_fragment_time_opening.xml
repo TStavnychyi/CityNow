@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/ll_time_opening"
-              android:layout_width="match_parent"
-              android:layout_height="50dp"
-              android:layout_marginLeft="16dp"
-              android:orientation="horizontal"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/rl_time_opening"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:animateLayoutChanges="true"
     >
 
     <ImageView
+        android:id="@+id/iv_time"
         android:layout_width="24dp"
         android:layout_height="24dp"
+        android:layout_marginTop="16dp"
         android:layout_gravity="center_vertical"
         android:src="@drawable/ic_access_time_black_24dp"
         />
@@ -18,10 +22,24 @@
         android:id="@+id/tv_places_detail_hour_opening"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="24dp"
+        android:layout_toRightOf="@id/iv_time"
+        android:drawablePadding="5dp"
+        android:drawableRight="@drawable/ic_keyboard_arrow_down_black_24dp"
         android:text="Opened today 12 - 22"
         android:textColor="@android:color/black"
-        android:layout_gravity="center_vertical"
-        android:layout_marginLeft="24dp"
+        android:layout_marginTop="16dp"
+        android:textSize="16sp"
         />
 
-</LinearLayout>
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_expandable_time_opening"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_places_detail_hour_opening"
+        android:layout_toRightOf="@id/iv_time"
+        android:layout_marginLeft="24dp"
+        android:visibility="gone"
+        />
+
+</RelativeLayout>

@@ -70,6 +70,9 @@ public class Result {
     @SerializedName("vicinity")
     @Expose
     private String vicinity;
+    @SerializedName("website")
+    @Expose
+    private String website;
 
     public List<AddressComponent> getAddressComponents() {
         return addressComponents;
@@ -237,5 +240,13 @@ public class Result {
 
     public void setPhotosUrls(List<String> photosUrls) {
         this.photosUrls = photosUrls;
+    }
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
     }
 }
