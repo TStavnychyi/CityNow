@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.arellomobile.mvp.MvpAppCompatFragment;
+import com.tstv.infofrom.ui.places.detail_places.PlacesDetailActivity;
 
 
 /**
@@ -48,5 +49,9 @@ public abstract class BaseFragment extends MvpAppCompatFragment {
 
     public BaseActivity getBaseActivity() {
         return (BaseActivity) getActivity();
+    }
+
+    public PlacesDetailActivity getPlacesDetailActivity() {
+        return (PlacesDetailActivity) getActivity();
     }
 }

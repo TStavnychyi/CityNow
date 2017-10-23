@@ -28,6 +28,7 @@
                         Rzeszów"
             android:textColor="@android:color/black"
             android:layout_marginLeft="24dp"
+            android:textSize="16sp"
             android:layout_alignBottom="@+id/iv_location_icon"
             android:layout_toEndOf="@+id/iv_location_icon"/>
 

@@ -108,7 +108,7 @@ public class PlacesDetailPresenter extends BasePresenter<PlacesDetailView> {
     }
 
     private Observable<Result> createDetailInfoObservable() {
-        return mDetailPlacesApi.get(mPlaceId, WEB_PLACES_API)
+        return mDetailPlacesApi.get(mPlaceId, "eng", WEB_PLACES_API)
                 .map(PlacesDetailInfo::getResult);
     }
 

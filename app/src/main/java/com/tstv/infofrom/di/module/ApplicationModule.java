@@ -3,6 +3,8 @@ package com.tstv.infofrom.di.module;
 import android.app.Application;
 import android.content.Context;
 
+import com.tstv.infofrom.common.manager.MyFragmentManager;
+
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -25,6 +27,11 @@ public class ApplicationModule {
     @Provides
     Context provideContext() {
         return mApplication;
+    }
+
+    @Provides
+    MyFragmentManager provideMyFragmentManager() {
+        return new MyFragmentManager();
     }
 
 }
