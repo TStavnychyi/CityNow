@@ -4,8 +4,7 @@ import android.app.Application;
 import android.content.Context;
 
 import com.tstv.infofrom.common.manager.MyFragmentManager;
-
-import javax.inject.Singleton;
+import com.tstv.infofrom.di.scopes.ApplicationContext;
 
 import dagger.Module;
 import dagger.Provides;
@@ -17,7 +16,30 @@ import dagger.Provides;
 @Module
 public class ApplicationModule {
 
-    private Application mApplication;
+
+    private final Application mApplication;
+
+    public ApplicationModule(Application application) {
+        mApplication = application;
+    }
+
+    @ApplicationContext
+    @Provides
+    Context provideContext() {
+        return mApplication;
+    }
+
+    @Provides
+    Application provideApplication() {
+        return mApplication;
+    }
+
+    @Provides
+    MyFragmentManager provideMyFragmentManager() {
+        return new MyFragmentManager();
+    }
+
+  /*  private Application mApplication;
 
     public ApplicationModule(Application application) {
         mApplication = application;
@@ -32,6 +54,6 @@ public class ApplicationModule {
     @Provides
     MyFragmentManager provideMyFragmentManager() {
         return new MyFragmentManager();
-    }
+    }*/
 
 }

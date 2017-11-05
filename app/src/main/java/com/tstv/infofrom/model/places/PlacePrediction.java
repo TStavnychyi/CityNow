@@ -1,6 +1,7 @@
 package com.tstv.infofrom.model.places;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 
 /**
  * Created by tstv on 25.09.2017.
@@ -25,6 +26,7 @@ public class PlacePrediction {
     }
 
     public PlacePrediction(String id, String placeName, String placeDescription, Bitmap bitmap) {
+        Log.e("PlacePrediction", "id - " + id + "name : " + placeName + ", placeDescr : " + placeDescription + ", bitmap : " + bitmap);
         this.id = id;
         this.placeName = placeName;
         this.placeDescription = placeDescription;

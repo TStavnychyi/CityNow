@@ -16,7 +16,7 @@ public class PlaceNearby {
     private String nextPageToken;
     @SerializedName("results")
     @Expose
-    private List<Result> results = null;
+    private List<Result> results;
     @SerializedName("status")
     @Expose
     private String status;

@@ -1,18 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-    <RelativeLayout
+
+    <android.support.design.widget.BottomNavigationView
+        android:id="@+id/bottom_navigation_menu"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        style=""
+        app:itemBackground="@color/warm_grey"
+        app:menu="@menu/bottom_navigation_menu"
+        app:itemIconTint="@drawable/bottom_navigation_view_selector"
+        app:itemTextColor="@drawable/bottom_navigation_view_selector"
 
-        <FrameLayout
-            android:id="@+id/main_wrapper"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+        />
+
+    <FrameLayout
+        android:id="@+id/main_wrapper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/bottom_navigation_menu"
+        />
+
 
         <RelativeLayout
             android:layout_marginBottom="?attr/actionBarSize"
@@ -29,17 +42,4 @@
 
         </RelativeLayout>
 
-        <android.support.design.widget.BottomNavigationView
-            android:id="@+id/bottom_navigation_menu"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            app:itemBackground="@color/colorBottomNavView"
-            app:menu="@menu/bottom_navigation_menu"
-            app:itemIconTint="@drawable/nav_item_color_state"
-            app:itemTextColor="@drawable/nav_item_color_state"
-            />
-
-    </RelativeLayout>
-
-</LinearLayout>
+</RelativeLayout>

@@ -5,6 +5,7 @@
     <string name="title_rv_google_reviews">Reviews in Google</string>
 
     <string name="WEB_API_KEY">AIzaSyCMlZedC-qCI3FrVEovQ49Qg3qlD0BhKFs</string>
+    <string name="BING_SEARCH_IMAGES">c61745c5264e49618c39afce7b75c093</string>
     <string name="places_detail_opening_time_close">CLOSE</string>
     <string name="places_detail_opening_time_open">"Opened today : "</string>
 
@@ -13,6 +14,10 @@
     <string name="nav_menu_weather">Weather</string>
     <string name="nav_menu_establishments">Establishments</string>
     <string name="nav_menu_road_traffic">Road traffic</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="nav_menu_search">Search</string>
+    <string name="some_error">Some Error Occurred!</string>
+    <string name="no_internet_connection_message">No Internet Connection</string>
 
 
 </resources>

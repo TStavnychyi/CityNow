@@ -1,6 +1,5 @@
 package com.tstv.infofrom.ui.places.detail_places;
 
-import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.content.Intent;
@@ -12,12 +11,15 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -32,6 +34,7 @@ import com.arellomobile.mvp.presenter.InjectPresenter;
 import com.bumptech.glide.Glide;
 import com.tstv.infofrom.MyApplication;
 import com.tstv.infofrom.R;
+import com.tstv.infofrom.common.utils.NetworkUtils;
 import com.tstv.infofrom.common.utils.Utils;
 import com.tstv.infofrom.model.places.detail_places.Result;
 import com.tstv.infofrom.rest.api.DetailPlacesApi;
@@ -196,9 +199,7 @@ public class PlacesDetailFragment extends BaseFragment implements PlacesDetailVi
 
     private int scrollRange = -1;
 
-    private Animator mCurrentAnimator;
-
-    private int mShortAnimationDuration;
+    private boolean isNetworkAvailable;
 
     public static PlacesDetailFragment newInstance(String id, byte[] bytes) {
         Bundle args = new Bundle();
@@ -214,25 +215,52 @@ public class PlacesDetailFragment extends BaseFragment implements PlacesDetailVi
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        placeId = getArguments().getString(ARG_PLACE_ID);
-        byteArray = getArguments().getByteArray(ARG_PLACE_PHOTO);
-        if (byteArray != null) {
-            photoBackgroundUrl = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
-        }
+        isNetworkAvailable = NetworkUtils.isNetworkConnected(getContext());
+        mProgressBar = getPlacesDetailActivity().getPlacesProgressBar();
 
-        MyApplication.get().getPlaceComponent().inject(this);
+        if (isNetworkAvailable) {
+            placeId = getArguments().getString(ARG_PLACE_ID);
+            byteArray = getArguments().getByteArray(ARG_PLACE_PHOTO);
 
-        if (placeId != null && !placeId.isEmpty()) {
-            mPresenter.setDetailPlacesApi(mDetailPlacesApi, mPhotoApi, placeId);
+            if (byteArray != null) {
+                photoBackgroundUrl = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+            }
 
+            MyApplication.get().getActivityComponent().inject(this);
+
+            if (placeId != null && !placeId.isEmpty()) {
+                mPresenter.setDetailPlacesApi(mDetailPlacesApi, mPhotoApi, placeId);
+
+            } else {
+                Toast.makeText(getContext(), "Place Id is null", Toast.LENGTH_SHORT).show();
+                getActivity().finish();
+            }
         } else {
-            Toast.makeText(getContext(), "Place Id is null", Toast.LENGTH_SHORT).show();
-            getActivity().finish();
+            getBaseActivity().showError(getString(R.string.no_internet_connection_message));
         }
 
     }
 
+    @Nullable
     @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_places_detail, container, false);
+
+        ButterKnife.bind(this, view);
+
+        setHasOptionsMenu(true);
+
+        initToolbar();
+
+        initRecyclerViews();
+
+        if (isNetworkAvailable) {
+            mPresenter.loadStart();
+        }
+        return view;
+    }
+
+  /*  @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
@@ -247,7 +275,7 @@ public class PlacesDetailFragment extends BaseFragment implements PlacesDetailVi
         initRecyclerViews();
 
         mPresenter.loadStart();
-    }
+    }*/
 
     @Override
     protected int getMainContentLayout() {
@@ -262,6 +290,16 @@ public class PlacesDetailFragment extends BaseFragment implements PlacesDetailVi
     @Override
     public int onCreateToolbarTitle() {
         return 0;
+    }
+
+    @Override
+    public String TAG() {
+        return null;
+    }
+
+    @Override
+    public Fragment getFragmentInstance() {
+        return null;
     }
 
     @Override
@@ -296,19 +334,23 @@ public class PlacesDetailFragment extends BaseFragment implements PlacesDetailVi
         if (isResultObjectAvailable(result)) {
             mResult = result;
 
-            if (result.getOpeningHours().getPeriods().get(0).getClose() != null &&
-                    result.getOpeningHours().getPeriods().get(0).getOpen() != null) {
-                if (result.getOpeningHours().getOpenNow()) {
-                    tv_places_detail_hour_opening.setText(getString(R.string.places_detail_opening_time_open)
-                            + Utils.formatPlaceOpenCloseTime(result.getOpeningHours().getPeriods().get(0).getOpen().getTime())
-                            + " - " + Utils.formatPlaceOpenCloseTime(result.getOpeningHours().getPeriods().get(0).getClose().getTime()));
-                } else {
-                    tv_places_detail_hour_opening.setText(R.string.places_detail_opening_time_close);
-                }
-            }
+            if (result.getOpeningHours() != null) {
 
-            if (result.getOpeningHours().getWeekdayText() != null) {
-                mHoursAdapter.setItems(mResult.getOpeningHours().getWeekdayText());
+
+                if (result.getOpeningHours().getPeriods().get(0).getClose() != null &&
+                        result.getOpeningHours().getPeriods().get(0).getOpen() != null) {
+                    if (result.getOpeningHours().getOpenNow()) {
+                        tv_places_detail_hour_opening.setText(getString(R.string.places_detail_opening_time_open)
+                                + Utils.formatPlaceOpenCloseTime(result.getOpeningHours().getPeriods().get(0).getOpen().getTime())
+                                + " - " + Utils.formatPlaceOpenCloseTime(result.getOpeningHours().getPeriods().get(0).getClose().getTime()));
+                    } else {
+                        tv_places_detail_hour_opening.setText(R.string.places_detail_opening_time_close);
+                    }
+                }
+
+                if (result.getOpeningHours().getWeekdayText() != null) {
+                    mHoursAdapter.setItems(mResult.getOpeningHours().getWeekdayText());
+                }
             }
 
             if (result.getRating() != null) {
@@ -343,7 +385,7 @@ public class PlacesDetailFragment extends BaseFragment implements PlacesDetailVi
                 ll_places_reviews.setVisibility(View.GONE);
             }
         } else {
-            Toast.makeText(getBaseActivity(), "Can't get any information about this place", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Can't get any information about this place", Toast.LENGTH_SHORT).show();
             getActivity().finish();
         }
     }
@@ -364,7 +406,7 @@ public class PlacesDetailFragment extends BaseFragment implements PlacesDetailVi
                 intent.setData(Uri.parse(url));
                 startActivity(intent);
             } else {
-                Toast.makeText(getBaseActivity(), "This place has no website", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "This place has no website", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -379,13 +421,13 @@ public class PlacesDetailFragment extends BaseFragment implements PlacesDetailVi
                 intent.setData(Uri.parse(url));
                 startActivity(intent);
             } else {
-                Toast.makeText(getBaseActivity(), "Can't show this place on the map", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Can't show this place on the map", Toast.LENGTH_SHORT).show();
             }
         }
 
     }
 
-    private boolean isResultObjectAvailable(Result result) {
+    private boolean isResultObjectAvailable(Object result) {
         return result != null;
     }
 

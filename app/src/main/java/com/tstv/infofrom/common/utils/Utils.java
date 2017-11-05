@@ -109,7 +109,7 @@ public class Utils {
     }
 
     public static String getPhotoFromBingAPI(String city) {
-        String url = "https://api.cognitive.microsoft.com/bing/v5.0/images/search?q=" + city +
+        String url = "https://api.cognitive.microsoft.com/bing/v7.0/images/search?q=" + city +
                 "&count=1"
                 + "&mkt=en-us"
                 + "&size=Large"
@@ -138,7 +138,7 @@ public class Utils {
 
     private static String performGetCallBingImageSearch(String url) {
         //IF GETTING ERROR,FIRST OF ALL CHECK IS API KEY EXPIRED!!!!
-        String aPI_KEY = "2f0f58921f614cf4bf2aa2ccb47f6b89";
+        String aPI_KEY = "c61745c5264e49618c39afce7b75c093";
         StringBuffer response = null;
         try {
             URL obj = new URL(url);

@@ -3,10 +3,12 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
 
-    <dimen name="collapsing_toolbar_height">250dp</dimen>
+    <dimen name="collapsing_toolbar_height">280dp</dimen>
 
     <dimen name="image_width">100dp</dimen>
     <dimen name="image_final_width">32dp</dimen>
     <dimen name="spacing_normal">16dp</dimen>
+    <dimen name="image_expand_size">230dp</dimen>
+    <dimen name="toolbar_title_margin_start">32dp</dimen>
 
 </resources>

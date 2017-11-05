@@ -1,15 +1,22 @@
 package com.tstv.infofrom;
 
+import android.app.Activity;
 import android.app.Application;
-import android.support.v7.app.AppCompatActivity;
 
+import com.arellomobile.mvp.MvpAppCompatActivity;
+import com.tstv.infofrom.di.component.ActivityComponent;
 import com.tstv.infofrom.di.component.ApplicationComponent;
+import com.tstv.infofrom.di.component.DaggerActivityComponent;
 import com.tstv.infofrom.di.component.DaggerApplicationComponent;
-import com.tstv.infofrom.di.component.DaggerPlaceComponent;
+import com.tstv.infofrom.di.component.DaggerRoadTrafficComponent;
 import com.tstv.infofrom.di.component.PlaceComponent;
+import com.tstv.infofrom.di.component.RoadTrafficComponent;
+import com.tstv.infofrom.di.module.ActivityModule;
 import com.tstv.infofrom.di.module.ApplicationModule;
-import com.tstv.infofrom.di.module.GoogleServicesModule;
-import com.tstv.infofrom.ui.places.PlacesFragment;
+import com.tstv.infofrom.di.module.GoogleLocationServicesModule;
+import com.tstv.infofrom.di.module.GooglePlacesServicesModule;
+import com.tstv.infofrom.ui.base.BaseActivity;
+import com.tstv.infofrom.ui.base.BaseFragment;
 import com.tstv.infofrom.ui.places.PlacesPresenter;
 
 import javax.inject.Inject;
@@ -26,8 +33,11 @@ public class MyApplication extends Application {
     protected static MyApplication instance;
 
     //Dagger 2 components
-    private PlaceComponent fragmentComponent;
-    private static ApplicationComponent sApplicationComponent;
+    private PlaceComponent mPlaceComponent;
+    private ApplicationComponent sApplicationComponent;
+    private RoadTrafficComponent mRoadTrafficComponent;
+    private ActivityComponent mActivityComponent;
+    //  private SearchPlacesComponent mSearchPlacesComponent;
 
 
     private static Double[] currentLtdLng;
@@ -55,7 +65,7 @@ public class MyApplication extends Application {
         return instance;
     }
 
-    public static ApplicationComponent getApplicationComponent() {
+    public ApplicationComponent getApplicationComponent() {
         return sApplicationComponent;
     }
 
@@ -64,24 +74,50 @@ public class MyApplication extends Application {
                 .applicationModule(new ApplicationModule(this)).build();
     }
 
-    public PlaceComponent plusFragmentComponent(PlacesFragment fragment, AppCompatActivity activity) {
-        if (fragmentComponent == null) {
-            fragmentComponent = DaggerPlaceComponent.builder()
-                    .googleServicesModule(new GoogleServicesModule(fragment, activity))
+    public ActivityComponent plusActivityComponent(BaseActivity activity, MvpAppCompatActivity listener) {
+        mActivityComponent = DaggerActivityComponent.builder()
+                .activityModule(new ActivityModule(activity))
+                .googlePlacesServicesModule(new GooglePlacesServicesModule(activity, listener))
+                .applicationComponent(getApplicationComponent())
+                .build();
+        return mActivityComponent;
+    }
+
+    public ActivityComponent getActivityComponent() {
+        return mActivityComponent;
+    }
+
+    public RoadTrafficComponent plusRoadTrafficComponent(BaseFragment fragment, Activity activity) {
+        if (mRoadTrafficComponent == null) {
+            mRoadTrafficComponent = DaggerRoadTrafficComponent.builder()
+                    .googleLocationServicesModule(new GoogleLocationServicesModule(fragment, activity))
                     .applicationComponent(sApplicationComponent)
                     .build();
         }
-        return fragmentComponent;
+        return mRoadTrafficComponent;
     }
 
-    public PlaceComponent getPlaceComponent() {
-        return fragmentComponent;
+    public RoadTrafficComponent getRoadTrafficComponent() {
+        return mRoadTrafficComponent;
     }
 
-    public void clearFragmentComponent() {
-        fragmentComponent = null;
-    }
+    /* public SearchPlacesComponent plusSearchPlacesComponent(SearchPlacesFragment fragment, AppCompatActivity activity) {
+         if (mSearchPlacesComponent == null) {
+             mSearchPlacesComponent = DaggerSearchPlacesComponent.builder()
+                     .googlePlacesServicesModule(new GooglePlacesServicesModule(fragment, activity))
+                     .build();
+         }
+         return mSearchPlacesComponent;
+     }
 
+     public SearchPlacesComponent getSearchPlacesComponent() {
+         return mSearchPlacesComponent;
+     }
+
+     public void clearSearchPlacesComponent() {
+         mSearchPlacesComponent = null;
+     }
+ */
     public static Double[] getCurrentLtdLng() {
         return currentLtdLng;
     }

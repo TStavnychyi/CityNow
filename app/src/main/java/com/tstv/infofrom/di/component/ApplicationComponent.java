@@ -3,10 +3,8 @@ package com.tstv.infofrom.di.component;
 import android.content.Context;
 
 import com.tstv.infofrom.di.module.ApplicationModule;
-import com.tstv.infofrom.di.module.RestModule;
-import com.tstv.infofrom.ui.base.BaseActivity;
+import com.tstv.infofrom.di.scopes.ApplicationContext;
 import com.tstv.infofrom.ui.base.MainPresenter;
-import com.tstv.infofrom.ui.weather.WeatherFragment;
 import com.tstv.infofrom.ui.weather.WeatherPresenter;
 
 import javax.inject.Singleton;
@@ -19,20 +17,27 @@ import dagger.Component;
 
 @Singleton
 @Component(
-        modules = {ApplicationModule.class, RestModule.class})
+        modules = {ApplicationModule.class})
 public interface ApplicationComponent {
 
-    //  @ApplicationContext
+    @ApplicationContext
     Context context();
 
+    /*NearbyPlacesApi nearbyPlacesApi();
+    DetailPlacesApi detailPlacesApi();
+    PlacesPhotoFromReferenceApi photoApi();
+    WeatherApi weatherAPi();
+*/
     //Targets
     //application
     //   void inject(MyApplication application);
 
     //activities
-    void inject(BaseActivity activity);
+    //   void inject(BaseActivity activity);
 
-    void inject(WeatherFragment fragment);
+    // void inject(WeatherFragment fragment);
+
+    // void inject(BaseFragment fragment);
 //    void inject(MainActivity activity);
 
     //fragments
