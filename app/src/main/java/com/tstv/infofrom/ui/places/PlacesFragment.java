@@ -1,10 +1,12 @@
 package com.tstv.infofrom.ui.places;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -12,27 +14,41 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.arellomobile.mvp.MvpAppCompatActivity;
 import com.arellomobile.mvp.presenter.InjectPresenter;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.tstv.infofrom.MyApplication;
 import com.tstv.infofrom.R;
-import com.tstv.infofrom.common.google.GoogleServicesHelper;
+import com.tstv.infofrom.common.google.GooglePlacesServicesHelper;
 import com.tstv.infofrom.common.utils.Utils;
 import com.tstv.infofrom.model.places.PlacePrediction;
 import com.tstv.infofrom.rest.api.NearbyPlacesApi;
 import com.tstv.infofrom.ui.base.BaseFragment;
 import com.tstv.infofrom.ui.base.BasePresenter;
+import com.tstv.infofrom.ui.places.search_places.SearchPlacesActivity;
 
 import javax.inject.Inject;
 
@@ -43,27 +59,42 @@ import butterknife.ButterKnife;
  * Created by tstv on 22.09.2017.
  */
 
-public class PlacesFragment extends BaseFragment implements PlacesView, GoogleServicesHelper.GoogleServicesListener {
+public class PlacesFragment extends BaseFragment implements PlacesView, AppBarLayout.OnOffsetChangedListener {
+
+    private final static String TAG = PlacesFragment.class.getSimpleName();
 
     private static final int REQUEST_LOCATION_PERMISSIONS = 1;
+
+    private final String[] locationPermission = {
+            Manifest.permission.ACCESS_FINE_LOCATION};
+
     @BindView(R.id.iv_places_image_title)
     ImageView iv_places_image_title;
 
     @BindView(R.id.tv_places_title)
     TextView tv_places_title;
 
-    @BindView(R.id.search_view_places)
-    SearchView mSearchView;
+    /*@BindView(R.id.search_view_places)
+    SearchView mSearchView;*/
+
+    @BindView(R.id.appbar_places)
+    AppBarLayout mAppBarLayout;
 
     @BindView(R.id.rv_places)
     RecyclerView mRecyclerView;
 
-    @BindView(R.id.tv_places_recommendations)
-    TextView tv_text_above_rv;
+  /*  @BindView(R.id.tv_places_recommendations)
+    TextView tv_text_above_rv;*/
 
     @BindView(R.id.progress_bar_recy_view)
     ProgressBar pb_recycler_view;
-  
+
+    @BindView(R.id.toolbar_places)
+    Toolbar mToolbar;
+
+    @BindView(R.id.places_collapsing_toolbar)
+    CollapsingToolbarLayout mCollapsingToolbarLayout;
+
     @InjectPresenter
     PlacesPresenter mPlacesPresenter;
 
@@ -74,61 +105,68 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
     NearbyPlacesApi mNearbyPlacesApi;
 
     @Inject
-    GoogleServicesHelper mGoogleServicesHelper;
-
-    @Inject
     LinearLayoutManager mLayoutManager;
 
-    private Typeface mBoldItalicFont;
+    GooglePlacesServicesHelper mGooglePlacesServicesHelper;
 
-    protected ProgressBar mProgressBar;
-
-    private static boolean isGooglePlayServicesAvailable;
-
-    private final String[] locationPermission = {
-            Manifest.permission.ACCESS_FINE_LOCATION};
+    protected ProgressDialog mProgressDialog;
 
     private boolean isInternetIsAvailable;
 
-    //  boolean isGooglePlayServicesConnected;
-
-    //  private boolean isLocationDataAlreadyUploaded;
-
-    boolean isGooglePlayServicesConnected;
+    boolean mIsGooglePlayServicesConnected;
 
     private boolean isLocationDataAlreadyUploaded;
+
+    private String currentCity;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        MyApplication.get().plusFragmentComponent(this, getBaseActivity()).inject(this);
+        setHasOptionsMenu(true);
 
-        isInternetIsAvailable = Utils.isNetworkAvailableAndConnected(getContext());
+        getBaseActivity().showDataProgress();
+
+        MyApplication.get().getActivityComponent().inject(this);
+
+        mGooglePlacesServicesHelper = getGooglePlacesServicesHelper();
+        mIsGooglePlayServicesConnected = isGooglePlacesServicesConnected();
+
+
+        isInternetIsAvailable = getBaseActivity().isNetworkConnected();
 
         if (isInternetIsAvailable) {
-            mGoogleServicesHelper.connect();
-            mPlacesPresenter.loadVariables(mPlacesAdapter, mGoogleServicesHelper, mNearbyPlacesApi);
-            mPlacesAdapter.setBaseActivity(getBaseActivity());
-        } else {
-            Toast.makeText(getContext(), "Internet is not available", Toast.LENGTH_SHORT).show();
+            if (mIsGooglePlayServicesConnected) {
+                mPlacesPresenter.loadVariables(mPlacesAdapter, mGooglePlacesServicesHelper, mNearbyPlacesApi);
+                if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(locationPermission, REQUEST_LOCATION_PERMISSIONS);
+                } else {
+                    requestSingleUpdate();
+                }
+            }
         }
     }
 
-
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        isGooglePlayServicesAvailable = false;
-        ButterKnife.bind(this, view);
+    public void onResume() {
+        super.onResume();
+    }
 
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_places, container, false);
+        ButterKnife.bind(this, view);
+        initToolbar();
+
+        mLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mPlacesAdapter);
         tv_places_title.setTypeface(getBoldItalicFont());
-        mProgressBar = getBaseActivity().getProgressBar();
 
         mPlacesPresenter.loadStart();
 
-        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+      /*  mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 mPlacesPresenter.getInputFromUser(query);
@@ -149,23 +187,74 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
             mPlacesPresenter.setNearbyPlaces();
             mSearchView.clearFocus();
             return true;
-        });
-
+        });*/
+        return view;
     }
+
+    /*@Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        isGooglePlayServicesAvailable = false;
+        ButterKnife.bind(this, view);
+        initToolbar();
+        Log.e(TAG, "onViewCreated");
+
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.setAdapter(mPlacesAdapter);
+        tv_places_title.setTypeface(getBoldItalicFont());
+     //   mProgressBar = getBaseActivity().getProgressBar();
+
+        mPlacesPresenter.loadStart();
+
+      *//*  mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                mPlacesPresenter.getInputFromUser(query);
+                mPlacesPresenter.loadData(BasePresenter.ProgressType.TextAutoComplete, isLocationDataAlreadyUploaded);
+                mSearchView.clearFocus();
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+
+        });
+        mSearchView.setOnSearchClickListener(v -> tv_text_above_rv.setText(R.string.text_above_rv_search_res));
+        mSearchView.setOnCloseListener(() -> {
+            tv_text_above_rv.setText(R.string.text_above_rv_default_data);
+            mPlacesPresenter.setNearbyPlaces();
+            mSearchView.clearFocus();
+            return true;
+        });*//*
+
+    }*/
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.e("TAG", "Destroy");
-        mGoogleServicesHelper.disconnect();
-        MyApplication.get().clearFragmentComponent();
+        Log.e("TAG", "Destroy" + PlacesFragment.this);
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        mGoogleServicesHelper.handleActivityResult(requestCode, resultCode, data, getBaseActivity());
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_fragment_places, menu);
+        // super.onCreateOptionsMenu(menu, inflater);
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.item_places_search:
+                Intent intent = new Intent(getContext(), SearchPlacesActivity.class);
+                startActivity(intent);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
@@ -185,18 +274,19 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
         }
     }
 
-    @Override
+   /* @Override
     public void onConnected() {
         isGooglePlayServicesAvailable = true;
-        isGooglePlayServicesConnected = true;
-        Toast.makeText(getBaseActivity(), "Google Services is Available now", Toast.LENGTH_SHORT).show();
-        if (ActivityCompat.checkSelfPermission(getBaseActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        mIsGooglePlayServicesConnected = true;
+        Log.e("TAG", "Google services is available now");
+//        Toast.makeText(getBaseActivity(), "Google Services is Available now", Toast.LENGTH_SHORT).show();
+       *//* if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(locationPermission, REQUEST_LOCATION_PERMISSIONS);
         } else {
             requestSingleUpdate();
-        }
+        }*//*
 
-       /* PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
+       *//* PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
         try {
             Intent i = builder.build(getBaseActivity());
             startActivityForResult(i, PLACE_PICKER_REQUEST);
@@ -204,16 +294,9 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
             e.printStackTrace();
         } catch (GooglePlayServicesNotAvailableException e) {
             e.printStackTrace();
-        }*/
+        }*//*
     }
-
-    @Override
-    public void onDisconnected() {
-        isGooglePlayServicesAvailable = false;
-        isGooglePlayServicesConnected = false;
-        isLocationDataAlreadyUploaded = false;
-        Toast.makeText(getBaseActivity(), "Google Services is not Available now", Toast.LENGTH_SHORT).show();
-    }
+*/
 
     @Override
     protected int getMainContentLayout() {
@@ -231,6 +314,19 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
     }
 
     @Override
+    public String TAG() {
+        return TAG;
+    }
+
+    @Override
+    public Fragment getFragmentInstance() {
+        Bundle args = new Bundle();
+        PlacesFragment fragment = new PlacesFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Override
     public void showRefreshing() {
 
     }
@@ -242,19 +338,19 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
 
     @Override
     public void showDataProgress() {
-        mProgressBar.setVisibility(View.VISIBLE);
+        getBaseActivity().showDataProgress();
         iv_places_image_title.setVisibility(View.GONE);
-        tv_text_above_rv.setVisibility(View.GONE);
-        mSearchView.setVisibility(View.GONE);
+        mToolbar.setVisibility(View.GONE);
+        mCollapsingToolbarLayout.setVisibility(View.GONE);
         tv_places_title.setVisibility(View.GONE);
     }
 
     @Override
     public void hideDataProgress() {
-        mProgressBar.setVisibility(View.GONE);
+        getBaseActivity().hideDataProgress();
         iv_places_image_title.setVisibility(View.VISIBLE);
-        tv_text_above_rv.setVisibility(View.VISIBLE);
-        mSearchView.setVisibility(View.VISIBLE);
+        mCollapsingToolbarLayout.setVisibility(View.VISIBLE);
+        mToolbar.setVisibility(View.VISIBLE);
         tv_places_title.setVisibility(View.VISIBLE);
     }
 
@@ -284,17 +380,35 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
 
     @Override
     public void setLocationData(PlacePrediction data) {
+        currentCity = data.getPlaceName();
         tv_places_title.setText(data.getPlaceName());
-        Glide.with(getContext())
+
+        Glide.with(getActivity())
                 .load(data.getImageUrl())
+                .listener(new RequestListener<Drawable>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                        Log.e("TAG", "onLoadFailed " + e);
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                        Log.e("TAG", "onResourceReady");
+                        return false;
+                    }
+                })
                 .into(iv_places_image_title);
         isLocationDataAlreadyUploaded = true;
     }
 
-    public static boolean isGoogleServicesAvailable() {
-        return isGooglePlayServicesAvailable;
+    private void initToolbar() {
+        mAppBarLayout.addOnOffsetChangedListener(this);
+        ((MvpAppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
+        //    toolbar.setPadding(0, getStatusBarHeight(), 0, 0);
+        getActivity().setTitle(null);
+        mToolbar.setTitleTextColor(getResources().getColor(R.color.white));
     }
-
 
     private void requestSingleUpdate() throws SecurityException {
         Log.e("TAG", "requestSingleUpdate");
@@ -329,4 +443,38 @@ public class PlacesFragment extends BaseFragment implements PlacesView, GoogleSe
     private Typeface getBoldItalicFont() {
         return Typeface.createFromAsset(getActivity().getAssets(), "Roboto_BoldItalic.ttf");
     }
+
+    @Override
+    public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+        if (Math.abs(verticalOffset) == appBarLayout.getTotalScrollRange()) {
+            // Collapsed
+            mToolbar.setTitle(currentCity);
+        } else if (verticalOffset == 0) {
+            // Expanded
+            mToolbar.setTitle("");
+        } else {
+            mToolbar.setTitle("");
+            // Somewhere in between
+
+        }
+       /* if (scrollRange == -1) {
+            scrollRange = appBarLayout.getTotalScrollRange();
+        }
+        if (scrollRange + verticalOffset == 0) {
+            Log.e("TAG", "onOffsetChanged");
+                mCollapsingToolbarLayout.setTitle(currentCity);
+            isCollapsingToolbarShow = true;
+        } else if (isCollapsingToolbarShow) {
+            mCollapsingToolbarLayout.setTitle(" ");
+            isCollapsingToolbarShow = false;
+        }*/
+    }
+
+    public static PlacesFragment newInstance() {
+        Bundle args = new Bundle();
+        PlacesFragment fragment = new PlacesFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
 }

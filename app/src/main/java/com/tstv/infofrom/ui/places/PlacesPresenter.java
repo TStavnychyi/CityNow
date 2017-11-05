@@ -9,13 +9,14 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.AutocompletePrediction;
 import com.google.android.gms.location.places.AutocompletePredictionBuffer;
+import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlacePhotoMetadata;
 import com.google.android.gms.location.places.PlacePhotoMetadataBuffer;
 import com.google.android.gms.location.places.PlacePhotoMetadataResult;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.tstv.infofrom.MyApplication;
-import com.tstv.infofrom.common.google.GoogleServicesHelper;
+import com.tstv.infofrom.common.google.GooglePlacesServicesHelper;
 import com.tstv.infofrom.common.utils.Utils;
 import com.tstv.infofrom.model.places.PlacePrediction;
 import com.tstv.infofrom.rest.api.NearbyPlacesApi;
@@ -51,32 +52,36 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
     private PlacesAdapter mPlacesAdapter;
 
 
-    GoogleServicesHelper mGoogleServicesHelper;
-
+    GooglePlacesServicesHelper mGooglePlacesServicesHelper;
 
     NearbyPlacesApi mNearbyPlacesApi;
 
     private AutocompleteFilter filter = new AutocompleteFilter.Builder()
-            .setTypeFilter(AutocompleteFilter.TYPE_FILTER_ESTABLISHMENT)
+            .setTypeFilter(Place.TYPE_ATM)
             .build();
 
     private LatLngBounds mLatLngBounds;
 
-    void loadVariables(PlacesAdapter adapter, GoogleServicesHelper googleServicesHelper, NearbyPlacesApi nearbyPlacesApi) {
+    void loadVariables(PlacesAdapter adapter, GooglePlacesServicesHelper googlePlacesServicesHelper, NearbyPlacesApi nearbyPlacesApi) {
         mPlacesAdapter = adapter;
-        mGoogleServicesHelper = googleServicesHelper;
+        mGooglePlacesServicesHelper = googlePlacesServicesHelper;
         mNearbyPlacesApi = nearbyPlacesApi;
     }
 
     void loadData(ProgressType progressType, boolean isLocationDataAlreadyLoaded) {
+        Log.e("TAG", "PlacesPresenter loadData()");
         final int[] i = {0};
         if (!isLocationDataAlreadyLoaded) {
             createLocationDataObservable()
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .doOnSubscribe(disposable -> onLoadingStart(progressType))
-                    .doFinally(() -> onLoadingFinish(progressType))
-
+                    .doFinally(() -> {
+                        onLoadingFinish(progressType);
+                        if (!isListLoadedEnough) {
+                            showRecyclerViewProgressBar();
+                        }
+                    })
                     .subscribe(locationData -> {
                         getViewState().setLocationData(locationData);
                     }, error -> {
@@ -92,20 +97,18 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
                 createNearbyPlacesDataObservable()
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .doOnSubscribe(disposable -> {
-                                    if (isLocationDataAlreadyLoaded)
-                                        showRecyclerViewProgressBar();
-                                }
-                        )
                         .subscribe(items -> {
                             i[0]++;
                             mSearchViewPlaces.add(items);
                             mNearbyPlaces.add(items);
                             mPlacesAdapter.setItems(mSearchViewPlaces);
                             if (mPlacesAdapter.isListLoadedEnough()) {
+                                isListLoadedEnough = true;
                                 hideRecyclerViewProgressBar();
                             }
 
+                        }, error -> {
+                            Log.e(TAG, "loadDataProgress erorr - " + error);
                         });
                 break;
             case TextAutoComplete:
@@ -138,6 +141,7 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
         if (currentCity == null && currentCity.isEmpty()) {
             return null;
         }
+
         return Observable.just(currentCity)
                 .flatMap(city -> Observable.just(Utils.getPhotoFromBingAPI(city)))
                 .map((imageUrl) -> new PlacePrediction(currentCity, imageUrl));
@@ -145,7 +149,7 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
 
     private Observable<PlacePrediction> createNearbyPlacesDataObservable() {
         String currentLatLng = Utils.getStringLatLngFromDouble(MyApplication.getCurrentLtdLng());
-        int radius = 5000;
+        int radius = 10000;
         String placesType = "cafe";
         return mNearbyPlacesApi.get(currentLatLng, radius, placesType, WEB_PLACES_API)
                 .flatMap(full -> Observable.fromIterable(full.getResults()))
@@ -159,11 +163,10 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
 
 
     private Observable<PlacePrediction> createSearchDataObservable() {
-        isLoading = PlacesFragment.isGoogleServicesAvailable();
         mLatLngBounds = Utils.getLatLngBoundsFromDouble(MyApplication.getCurrentLtdLng());
         return Observable.create(sub -> {
             PendingResult<AutocompletePredictionBuffer> result =
-                    Places.GeoDataApi.getAutocompletePredictions(mGoogleServicesHelper.getApiClient(), input_text, mLatLngBounds, filter);
+                    Places.GeoDataApi.getAutocompletePredictions(mGooglePlacesServicesHelper.getApiClient(), input_text, mLatLngBounds, filter);
             AutocompletePredictionBuffer autocompletePredictions = result.await();
             final Status status = autocompletePredictions.getStatus();
             if (!status.isSuccess()) {
@@ -186,12 +189,12 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
     private Bitmap getPlacePhoto(String id) {
         Bitmap image = null;
         PlacePhotoMetadataResult result = Places.GeoDataApi
-                .getPlacePhotos(mGoogleServicesHelper.getApiClient(), id).await();
+                .getPlacePhotos(mGooglePlacesServicesHelper.getApiClient(), id).await();
         if (result.getStatus().isSuccess()) {
             PlacePhotoMetadataBuffer photoMetadataBuffer = result.getPhotoMetadata();
             if (photoMetadataBuffer.getCount() > 0) {
                 PlacePhotoMetadata photo = photoMetadataBuffer.get(0);
-                image = photo.getScaledPhoto(mGoogleServicesHelper.getApiClient(), 150, 150).await().getBitmap();
+                image = photo.getScaledPhoto(mGooglePlacesServicesHelper.getApiClient(), 150, 150).await().getBitmap();
             }
             photoMetadataBuffer.release();
         }

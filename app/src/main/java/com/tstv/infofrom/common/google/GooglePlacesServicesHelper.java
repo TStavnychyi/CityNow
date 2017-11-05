@@ -23,7 +23,9 @@ import static com.tstv.infofrom.ui.base.BaseActivity.PLACE_PICKER_REQUEST;
  * Created by tstv on 20.09.2017.
  */
 
-public class GoogleServicesHelper implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class GooglePlacesServicesHelper implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+
+    private static final String TAG = GooglePlacesServicesHelper.class.getSimpleName();
 
     public interface GoogleServicesListener {
         void onConnected();
@@ -38,7 +40,7 @@ public class GoogleServicesHelper implements GoogleApiClient.ConnectionCallbacks
     private GoogleServicesListener listener;
     private GoogleApiClient apiClient;
 
-    public GoogleServicesHelper(Activity activity, GoogleServicesListener listener) {
+    public GooglePlacesServicesHelper(Activity activity, GoogleServicesListener listener) {
         this.listener = listener;
         this.activity = activity;
 
@@ -52,6 +54,7 @@ public class GoogleServicesHelper implements GoogleApiClient.ConnectionCallbacks
     }
 
     public void connect() {
+        Log.e(TAG, "GooglePlacesServicesHelper connect()");
         if (isGooglePlayServicesAvailable()) {
             apiClient.connect();
         } else {
@@ -60,6 +63,7 @@ public class GoogleServicesHelper implements GoogleApiClient.ConnectionCallbacks
     }
 
     public void disconnect() {
+        Log.e(TAG, "GooglePlacesServicesHelper disconnect()");
         if (isGooglePlayServicesAvailable()) {
             apiClient.disconnect();
         } else {
@@ -89,6 +93,7 @@ public class GoogleServicesHelper implements GoogleApiClient.ConnectionCallbacks
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
+        Log.e(TAG, "GooglePlacesServicesHelper onConnected()");
         listener.onConnected();
     }
 
@@ -122,13 +127,13 @@ public class GoogleServicesHelper implements GoogleApiClient.ConnectionCallbacks
         if (requestCode == PLACE_PICKER_REQUEST && resultCode == RESULT_OK){
             Place place = PlacePicker.getPlace(context, data);
             if (place == null){
-                Log.e("TAG", "No place selected");
+                Log.e(TAG, "No place selected");
                 return;
             }
             String placeId = place.getId();
             String placeAddress = (String) place.getAddress();
             Float rating  = place.getRating();
-            Log.e("TAG", "Place rating : " + rating + ", and place address : " + placeAddress);
+            Log.e(TAG, "Place rating : " + rating + ", and place address : " + placeAddress);
         }
     }
 }

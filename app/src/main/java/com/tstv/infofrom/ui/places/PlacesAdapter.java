@@ -3,14 +3,15 @@ package com.tstv.infofrom.ui.places;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.tstv.infofrom.R;
 import com.tstv.infofrom.model.places.PlacePrediction;
-import com.tstv.infofrom.ui.base.BaseActivity;
 import com.tstv.infofrom.ui.places.detail_places.PlacesDetailActivity;
 
 import java.io.ByteArrayOutputStream;
@@ -27,11 +28,10 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.PlacesItemViewHolder> {
 
+
     private List<PlacePrediction> mPlacePredictions = new ArrayList<>();
 
     private boolean isListLoadedEnough;
-
-    BaseActivity mBaseActivity;
 
     public PlacesAdapter() {
     }
@@ -41,7 +41,9 @@ public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.PlacesItem
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_recommendations_places, parent, false);
         return new PlacesItemViewHolder(view);
+
     }
+
 
     @Override
     public void onBindViewHolder(PlacesItemViewHolder holder, int position) {
@@ -60,10 +62,11 @@ public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.PlacesItem
 
     @Override
     public int getItemCount() {
-        return mPlacePredictions.size();
+        return mPlacePredictions == null ? 0 : mPlacePredictions.size();
     }
 
     void setItems(List<PlacePrediction> items) {
+        Log.e("PlacesAdapter", "setItems");
         clearList();
         mPlacePredictions.addAll(items);
         if (mPlacePredictions.size() >= 3) {
@@ -81,12 +84,18 @@ public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.PlacesItem
         isListLoadedEnough = listLoadedEnough;
     }
 
-    void setBaseActivity(BaseActivity activity) {
-        mBaseActivity = activity;
-    }
-
     private void clearList() {
         mPlacePredictions.clear();
+    }
+
+    class LoadingViewHolder extends RecyclerView.ViewHolder {
+        @BindView(R.id.rv_loading_progressBar)
+        ProgressBar mProgressBar;
+
+        public LoadingViewHolder(View itemView) {
+            super(itemView);
+            ButterKnife.bind(this, itemView);
+        }
     }
 
     class PlacesItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

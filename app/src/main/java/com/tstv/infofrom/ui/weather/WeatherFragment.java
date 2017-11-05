@@ -11,10 +11,13 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,6 +42,8 @@ import butterknife.ButterKnife;
 public class WeatherFragment extends BaseFragment implements WeatherView {
 
     private static final int REQUEST_LOCATION_PERMISSIONS = 1;
+
+    public static final String TAG = WeatherFragment.class.getSimpleName();
 
     @BindView(R.id.tv_temp_city)
     protected TextView tv_temp_city;
@@ -67,8 +72,6 @@ public class WeatherFragment extends BaseFragment implements WeatherView {
     @BindView(R.id.tv_temp_time)
     protected TextView tv_temp_time;
 
-    protected ProgressBar mProgressBar;
-
     @InjectPresenter
     WeatherPresenter mPresenter;
 
@@ -78,35 +81,71 @@ public class WeatherFragment extends BaseFragment implements WeatherView {
     private final String[] locationPermission = {
             Manifest.permission.ACCESS_FINE_LOCATION};
 
+    private boolean isNetworkConnected;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (ActivityCompat.checkSelfPermission(getBaseActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(locationPermission, REQUEST_LOCATION_PERMISSIONS);
+        getBaseActivity().showDataProgress();
+
+        isNetworkConnected = getBaseActivity().isNetworkConnected();
+
+        MyApplication.get().getActivityComponent().inject(this);
+
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_temperature, container, false);
+
+        if (isNetworkConnected) {
+            if (ActivityCompat.checkSelfPermission(getBaseActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(locationPermission, REQUEST_LOCATION_PERMISSIONS);
+            } else {
+                requestSingleUpdate();
+            }
         } else {
-            requestSingleUpdate();
+            getBaseActivity().showError(getString(R.string.no_internet_connection_message));
         }
+
+
+        return view;
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
-        MyApplication.getApplicationComponent().inject(this);
 
         setupSwipeToRefreshLayout(view);
-
-        // mPresenter = onCreateTempPresenter();
-        // mPresenter.loadStart();
     }
 
-    private void setupSwipeToRefreshLayout(View rootView){
+    public static WeatherFragment newInstance() {
+        Bundle args = new Bundle();
+        WeatherFragment fragment = new WeatherFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    private void setupSwipeToRefreshLayout(View rootView) {
         mSwipeRefreshLayout.setOnRefreshListener(() -> mPresenter.loadRefresh());
 
         mSwipeRefreshLayout.setColorSchemeResources(R.color.colorAccent);
-        mProgressBar = getBaseActivity().getProgressBar();
 
+    }
+
+    @Override
+    public String TAG() {
+        return TAG;
+    }
+
+    @Override
+    public Fragment getFragmentInstance() {
+        Bundle args = new Bundle();
+        WeatherFragment fragment = new WeatherFragment();
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
@@ -124,15 +163,14 @@ public class WeatherFragment extends BaseFragment implements WeatherView {
         return 0;
     }
 
-
     @Override
     public void showDataProgress() {
-        mProgressBar.setVisibility(View.VISIBLE);
+        getBaseActivity().showDataProgress();
     }
 
     @Override
     public void hideDataProgress() {
-        mProgressBar.setVisibility(View.GONE);
+        getBaseActivity().hideDataProgress();
     }
 
     @Override
@@ -190,9 +228,14 @@ public class WeatherFragment extends BaseFragment implements WeatherView {
             locationManager.requestSingleUpdate(criteria, new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
+                    Log.e("TAG", "Location : " + location.getLatitude());
                     getLocationData(location);
-                    mPresenter.loadVariables(mWeatherApi, MyApplication.getCurrentCity());
-                    mPresenter.loadStart();
+                    if (MyApplication.getCurrentCity() != null && !MyApplication.getCurrentCity().isEmpty()) {
+                        mPresenter.loadVariables(mWeatherApi, MyApplication.getCurrentCity());
+                        mPresenter.loadStart();
+                    } else {
+                        Toast.makeText(getActivity(), "Can't find current location", Toast.LENGTH_SHORT).show();
+                    }
                 }
 
                 @Override
@@ -205,6 +248,7 @@ public class WeatherFragment extends BaseFragment implements WeatherView {
 
                 @Override
                 public void onProviderDisabled(String provider) {
+                    getBaseActivity().hideDataProgress();
                     Toast.makeText(getBaseActivity(), "Make sure to enable Internet on your phone", Toast.LENGTH_SHORT).show();
                 }
             }, null);

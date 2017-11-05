@@ -17,4 +17,10 @@ public interface BaseView extends MvpView {
     void hideDataProgress();
 
     void showError(String message);
+
+    void showMessage(String message);
+
+    //  boolean isNetworkConnected();
+
+    void hideKeyboard();
 }

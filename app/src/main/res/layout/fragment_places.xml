@@ -1,106 +1,138 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                                 xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                 xmlns:tools="http://schemas.android.com/tools"
+                                                 android:layout_width="match_parent"
+                                                 android:layout_height="match_parent"
+                                                 android:background="@drawable/background_image"
+                                                 android:fitsSystemWindows="true"
+                                                 app:statusBarBackground="@null"
+
     >
 
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        android:src="@drawable/background_image"
-        />
-
-    <RelativeLayout
-        android:id="@+id/rel_head"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <ImageView
-            android:id="@+id/iv_places_image_title"
-            android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:scaleType="centerCrop"
-            android:visibility="gone"
-            />
-
-        <TextView
-            android:id="@+id/tv_places_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@android:color/white"
-            android:textSize="32sp"
-            android:layout_centerInParent="true"
-            android:textStyle="bold"
-            android:visibility="gone"
-            />
-
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:id="@+id/rel_search"
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appbar_places"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="12dp"
-        android:layout_below="@id/rel_head"
-
+        android:fitsSystemWindows="true"
         >
 
-        <android.support.v7.widget.SearchView
-            android:id="@+id/search_view_places"
+        <android.support.design.widget.CollapsingToolbarLayout
+            android:id="@+id/places_collapsing_toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:queryHint="Find your place"
-            app:defaultQueryHint="Find your place"
-            android:background="@drawable/my_search_view_places"
-
+            android:layout_height="@dimen/image_expand_size"
+            android:fitsSystemWindows="true"
+            style="@style/Widget.CollapsingHeader"
+            app:contentScrim="@color/theme_primary_dark"
             android:visibility="gone"
-            />
+            app:titleEnabled="false"
+            app:expandedTitleMarginBottom="70dp"
+            app:expandedTitleMarginStart="48dp"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            >
 
-    </RelativeLayout>
+            <ImageView
+                android:id="@+id/iv_places_image_title"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/image_expand_size"
+                android:scaleType="centerCrop"
+                android:adjustViewBounds="true"
+                android:fitsSystemWindows="true"
+                app:layout_collapseMode="parallax"
+                android:visibility="gone"/>
 
-    <RelativeLayout
+            <TextView
+                android:id="@+id/tv_places_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|center_horizontal"
+                android:textColor="@android:color/white"
+                android:textSize="32sp"
+                android:textStyle="bold"
+                android:visibility="gone"/>
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar_places"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:layout_gravity="top"
+                app:contentInsetEnd="12dp"
+                android:visibility="gone"
+                app:layout_collapseMode="pin"
+                app:titleTextColor="@android:color/white"
+                app:titleMarginStart="@dimen/toolbar_title_margin_start"
+                app:popupTheme="@style/ThemeOverlay.ToolbarPopup"/>
+
+
+        </android.support.design.widget.CollapsingToolbarLayout>
+
+
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="12dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_below="@id/rel_search"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         >
 
-        <ProgressBar
-            android:id="@+id/progress_bar_recy_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:visibility="gone"
-            />
-
-        <TextView
-            android:id="@+id/tv_places_recommendations"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/text_above_rv_default_data"
-            android:textSize="18sp"
-            android:textStyle="bold|italic"
-            android:visibility="gone"
-            android:textColor="@android:color/black"
-
-            />
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/rv_places"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scrollbars="vertical"
-            android:layout_below="@id/tv_places_recommendations"
-            android:layout_marginTop="6dp"
-            android:visibility="gone"
-            />
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp">
 
-    </RelativeLayout>
 
-</RelativeLayout>
+            <!--    <android.support.v7.widget.SearchView
+                    android:id="@+id/search_view_places"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/my_search_view_places"
+                    android:visibility="gone"
+                    app:defaultQueryHint="Find your place"
+                    app:queryHint="Find your place"
+                    />
+
+
+        -->
+
+            <!--<TextView
+                android:id="@+id/tv_places_recommendations"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/text_above_rv_default_data"
+                android:textColor="@android:color/black"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:visibility="gone"/>-->
+
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/rv_places"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="8dp"
+                android:clipToPadding="false"
+                android:nestedScrollingEnabled="false"
+                android:paddingBottom="@dimen/spacing_normal"
+                android:scrollbarStyle="insideOverlay"
+                android:scrollbars="vertical"
+                android:visibility="gone"/>
+
+
+            <ProgressBar
+                android:id="@+id/progress_bar_recy_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@id/rv_places"
+                android:layout_marginTop="32dp"
+                android:visibility="gone"
+                />
+
+        </RelativeLayout>
+
+    </android.support.v4.widget.NestedScrollView>
+
+
+</android.support.design.widget.CoordinatorLayout>
