@@ -112,6 +112,7 @@ public class MainActivity extends BaseActivity implements MainView {
         }
     }
 
+
     @Override
     public void showWeatherFragment() {
         if (mCurrentFragment instanceof WeatherFragment) {

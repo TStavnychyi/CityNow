@@ -108,6 +108,19 @@ public class Utils {
         return city;
     }
 
+    public static String getCountryCodeFromLatLng(Double[] arg, Context context) {
+        Geocoder gcd = new Geocoder(context, Locale.ENGLISH);
+        String country = null;
+        try {
+            List<Address> addresses = gcd.getFromLocation(arg[0], arg[1], 1);
+            country = addresses.get(0).getCountryCode();
+            Log.e("TAG", "Country Code : " + country);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return country;
+    }
+
     public static String getPhotoFromBingAPI(String city) {
         String url = "https://api.cognitive.microsoft.com/bing/v7.0/images/search?q=" + city +
                 "&count=1"

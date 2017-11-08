@@ -33,8 +33,8 @@ public class GooglePlacesServicesHelper implements GoogleApiClient.ConnectionCal
         void onDisconnected();
     }
 
-    private static final int REQUEST_CODE_RESOLUTION = -100;
-    private static final int REQUEST_CODE_AVAILABILITY = -101;
+    public static final int REQUEST_CODE_RESOLUTION = -100;
+    public static final int REQUEST_CODE_AVAILABILITY = -101;
 
     private Activity activity;
     private GoogleServicesListener listener;

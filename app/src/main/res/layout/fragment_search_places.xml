@@ -2,7 +2,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:fitsSystemWindows="true"
+                app:statusBarBackground="@color/theme_primary_dark"
+    >
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar_search_places"
@@ -13,18 +16,13 @@
         />
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/search_places_categories_rv"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/toolbar_search_places"
-        />
-
-    <android.support.v7.widget.RecyclerView
         android:id="@+id/search_places_rv"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/toolbar_search_places"
         android:scrollbars="vertical"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
         android:visibility="gone"
         />
 

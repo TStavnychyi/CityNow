@@ -38,7 +38,11 @@ public class PlacesDetailActivity extends MvpAppCompatActivity implements MainVi
 
             String id = getIntent().getStringExtra(EXTRA_PLACE_ID);
             byte[] byteArray = getIntent().getByteArrayExtra(EXTRA_PLACE_PHOTO_URL);
-            launchFragment(PlacesDetailFragment.newInstance(id, byteArray));
+            if (byteArray != null) {
+                launchFragment(PlacesDetailFragment.newInstance(id, byteArray));
+            } else {
+                launchFragment(PlacesDetailFragment.newInstance(id));
+            }
         } else {
             Toast.makeText(this, getString(R.string.no_internet_connection_message), Toast.LENGTH_SHORT).show();
         }
@@ -53,6 +57,12 @@ public class PlacesDetailActivity extends MvpAppCompatActivity implements MainVi
         Intent intent = new Intent(packageContext, PlacesDetailActivity.class);
         intent.putExtra(EXTRA_PLACE_ID, id);
         intent.putExtra(EXTRA_PLACE_PHOTO_URL, byteArray);
+        return intent;
+    }
+
+    public static Intent newIntent(Context packageContext, String id) {
+        Intent intent = new Intent(packageContext, PlacesDetailActivity.class);
+        intent.putExtra(EXTRA_PLACE_ID, id);
         return intent;
     }
 

@@ -17,8 +17,7 @@
         android:theme="@style/Theme.InfoFrom">
         <activity
             android:name=".ui.base.MainActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            >
+            android:configChanges="orientation|keyboardHidden|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -37,8 +36,10 @@
 
         <meta-data
             android:name="android.app.searchable"
-            android:resource="@xml/searchable"
-            />
+            android:resource="@xml/searchable"/>
+
+        <activity android:name=".ui.places.categories.CategoriesActivity">
+        </activity>
     </application>
 
 </manifest>

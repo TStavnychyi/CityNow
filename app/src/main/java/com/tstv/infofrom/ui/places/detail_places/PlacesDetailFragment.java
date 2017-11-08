@@ -212,6 +212,16 @@ public class PlacesDetailFragment extends BaseFragment implements PlacesDetailVi
 
     }
 
+    public static PlacesDetailFragment newInstance(String id) {
+        Bundle args = new Bundle();
+        args.putString(ARG_PLACE_ID, id);
+
+        PlacesDetailFragment fragment = new PlacesDetailFragment();
+        fragment.setArguments(args);
+        return fragment;
+
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

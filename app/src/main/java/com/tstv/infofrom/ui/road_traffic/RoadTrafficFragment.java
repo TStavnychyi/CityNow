@@ -192,7 +192,7 @@ public class RoadTrafficFragment extends BaseFragment implements RoadTrafficView
             if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
             }
-            Toast.makeText(getBaseActivity(), "Google Services is Available now", Toast.LENGTH_SHORT).show();
+            //   Toast.makeText(getBaseActivity(), "Google Services is Available now", Toast.LENGTH_SHORT).show();
         }
 
     }

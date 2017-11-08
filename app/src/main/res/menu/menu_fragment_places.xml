@@ -3,6 +3,14 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/item_places_categories"
+        android:icon="@drawable/ic_categories"
+        android:title="@string/menu_item_categories"
+        android:enabled="true"
+        app:showAsAction="ifRoom"
+        />
+
+    <item
         android:id="@+id/item_places_search"
         android:icon="@drawable/ic_search_white_24dp"
         android:title="@string/nav_menu_search"

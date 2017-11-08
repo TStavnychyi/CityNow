@@ -44,6 +44,8 @@ public class MyApplication extends Application {
 
     private static String currentCity;
 
+    private static String currentCountry;
+
 
     @Inject
     PlacesPresenter mPlacesPresenter;
@@ -132,6 +134,14 @@ public class MyApplication extends Application {
 
     public static void setCurrentCity(String currentCity) {
         MyApplication.currentCity = currentCity;
+    }
+
+    public static String getCurrentCountry() {
+        return currentCountry;
+    }
+
+    public static void setCurrentCountry(String currentCountry) {
+        MyApplication.currentCountry = currentCountry;
     }
 }
 

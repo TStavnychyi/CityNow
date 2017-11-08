@@ -7,7 +7,9 @@ import com.tstv.infofrom.di.scopes.PerActivity;
 import com.tstv.infofrom.ui.base.BaseActivity;
 import com.tstv.infofrom.ui.base.MainActivity;
 import com.tstv.infofrom.ui.places.PlacesFragment;
+import com.tstv.infofrom.ui.places.categories.CategoriesActivity;
 import com.tstv.infofrom.ui.places.detail_places.PlacesDetailFragment;
+import com.tstv.infofrom.ui.places.search_places.SearchPlacesFragment;
 import com.tstv.infofrom.ui.weather.WeatherFragment;
 
 import dagger.Component;
@@ -22,6 +24,8 @@ public interface ActivityComponent {
 
     void inject(BaseActivity activity);
 
+    void inject(CategoriesActivity activity);
+
     void inject(MainActivity activity);
 
     void inject(WeatherFragment fragment);
@@ -29,4 +33,6 @@ public interface ActivityComponent {
     void inject(PlacesFragment fragment);
 
     void inject(PlacesDetailFragment fragment);
+
+    void inject(SearchPlacesFragment fragment);
 }

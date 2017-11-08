@@ -1,7 +1,5 @@
 package com.tstv.infofrom.di.module;
 
-import android.util.Log;
-
 import com.arellomobile.mvp.MvpAppCompatActivity;
 import com.tstv.infofrom.common.google.GooglePlacesServicesHelper;
 import com.tstv.infofrom.ui.base.BaseActivity;
@@ -21,7 +19,6 @@ public class GooglePlacesServicesModule {
     private MvpAppCompatActivity mAppCompatActivity;
 
     public GooglePlacesServicesModule(BaseActivity fragment, MvpAppCompatActivity appCompatActivity) {
-        Log.e("GoogleServicesModule", "constructor()");
         googleServicesListener = fragment;
         mAppCompatActivity = appCompatActivity;
     }
