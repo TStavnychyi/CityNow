@@ -2,32 +2,44 @@ package com.tstv.infofrom.ui.places.search_places;
 
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.arellomobile.mvp.MvpAppCompatActivity;
 import com.arellomobile.mvp.presenter.InjectPresenter;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlacePicker;
+import com.tstv.infofrom.MyApplication;
 import com.tstv.infofrom.R;
 import com.tstv.infofrom.common.google.GooglePlacesServicesHelper;
 import com.tstv.infofrom.rest.api.NearbyPlacesApi;
 import com.tstv.infofrom.ui.base.BaseFragment;
 import com.tstv.infofrom.ui.base.BasePresenter;
+import com.tstv.infofrom.ui.places.detail_places.PlacesDetailActivity;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static android.app.Activity.RESULT_OK;
 
 /**
  * Created by tstv on 24.10.2017.
@@ -35,10 +47,12 @@ import butterknife.ButterKnife;
 
 public class SearchPlacesFragment extends BaseFragment implements SearchPlacesView, GooglePlacesServicesHelper.GoogleServicesListener {
 
-    private ProgressBar mProgressBar;
+    private static final String TAG = SearchPlacesFragment.class.getSimpleName();
 
-    @BindView(R.id.search_places_categories_rv)
-    RecyclerView mCategoriesRecyclerView;
+    int PLACE_PICKER_REQUEST = 1;
+    PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
+
+    private ProgressBar mProgressBar;
 
     @BindView(R.id.search_places_rv)
     RecyclerView mSearchPlacesRecyclerView;
@@ -49,50 +63,74 @@ public class SearchPlacesFragment extends BaseFragment implements SearchPlacesVi
     @InjectPresenter
     SearchPlacesPresenter mPresenter;
 
-    // @Inject
-    SearchPlacesCategoriesAdapter mAdapter;
+    @Inject
+    SearchPlacesAdapter mSearchPlacesAdapter;
 
-    //  @Inject
-    GooglePlacesServicesHelper mGooglePlacesServicesHelper;
-
-    //  @Inject
+    @Inject
     NearbyPlacesApi mNearbyPlacesApi;
 
-    //  @Inject
-    GridLayoutManager mLinearLayoutManager;
+    @Inject
+    LinearLayoutManager mLinearLayoutManager;
+
+    // @Inject
+    GooglePlacesServicesHelper mGooglePlacesServicesHelper;
+
+    boolean mIsGooglePlayServicesConnected = false;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //   MyApplication.get().plusFragmentComponent(SearchPlacesFragment.this,getSearchPlacesActivity()).inject(this);
+        MyApplication.get().getActivityComponent().inject(this);
+        mGooglePlacesServicesHelper = new GooglePlacesServicesHelper(getActivity(), this);
+        mGooglePlacesServicesHelper.connect();
+
+      /*  try {
+            startActivityForResult(builder.build(getActivity()), PLACE_PICKER_REQUEST);
+        } catch (GooglePlayServicesRepairableException e) {
+            e.printStackTrace();
+        } catch (GooglePlayServicesNotAvailableException e) {
+            e.printStackTrace();
+        }*/
     }
 
+    @Nullable
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_search_places, container, false);
+
         ButterKnife.bind(this, view);
+
+        mPresenter.loadVariables(mSearchPlacesAdapter, mGooglePlacesServicesHelper);
 
         setHasOptionsMenu(true);
         initToolbar();
 
-        //    mNearbyPlacesApi = getNearbyPlacesApi();
-
-        mGooglePlacesServicesHelper.connect();
-
         mProgressBar = getSearchPlacesActivity().getProgressBar();
 
-        mLinearLayoutManager.setOrientation(GridLayoutManager.VERTICAL);
-        mCategoriesRecyclerView.setLayoutManager(mLinearLayoutManager);
-        mCategoriesRecyclerView.setAdapter(mAdapter);
+        setRecyclerViews();
 
+        return view;
     }
-
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mGooglePlacesServicesHelper.disconnect();
-        //    mGooglePlacesServicesHelper = null;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        mGooglePlacesServicesHelper.handleActivityResult(requestCode, resultCode, data, getBaseActivity());
+
+        if (requestCode == PLACE_PICKER_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                Place place = PlacePicker.getPlace(data, getActivity());
+                String placeId = place.getId();
+                Intent intent = PlacesDetailActivity.newIntent(getActivity(), placeId);
+                getActivity().startActivity(intent);
+
+            }
+        }
     }
 
     @Override
@@ -106,6 +144,7 @@ public class SearchPlacesFragment extends BaseFragment implements SearchPlacesVi
 
         SearchView searchView = null;
 
+
         if (searchItem != null) {
             searchView = (SearchView) searchItem.getActionView();
             searchView.setIconified(false);
@@ -115,14 +154,20 @@ public class SearchPlacesFragment extends BaseFragment implements SearchPlacesVi
             searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                 @Override
                 public boolean onQueryTextSubmit(String query) {
-
-                    return false;
+                    mPresenter.getResultFromInput(query);
+                    closeKeyboard();
+                    return true;
                 }
 
                 @Override
                 public boolean onQueryTextChange(String newText) {
                     return false;
                 }
+            });
+
+            searchView.setOnCloseListener(() -> {
+                closeKeyboard();
+                return true;
             });
 
         }
@@ -183,14 +228,12 @@ public class SearchPlacesFragment extends BaseFragment implements SearchPlacesVi
     @Override
     public void showDataProgress() {
         mProgressBar.setVisibility(View.VISIBLE);
-        mCategoriesRecyclerView.setVisibility(View.GONE);
+        hideSearchPlacesRecyclerView();
     }
 
     @Override
     public void hideDataProgress() {
         mProgressBar.setVisibility(View.GONE);
-        mCategoriesRecyclerView.setVisibility(View.VISIBLE);
-
     }
 
     @Override
@@ -207,16 +250,6 @@ public class SearchPlacesFragment extends BaseFragment implements SearchPlacesVi
     }
 
     @Override
-    public void showCategoriesRecyclerView() {
-        mCategoriesRecyclerView.setVisibility(View.VISIBLE);
-    }
-
-    @Override
-    public void hideCategoriesRecyclerView() {
-        mCategoriesRecyclerView.setVisibility(View.GONE);
-    }
-
-    @Override
     public void showSearchPlacesRecyclerView() {
         mSearchPlacesRecyclerView.setVisibility(View.VISIBLE);
     }
@@ -226,15 +259,28 @@ public class SearchPlacesFragment extends BaseFragment implements SearchPlacesVi
         mSearchPlacesRecyclerView.setVisibility(View.GONE);
     }
 
+    private void setRecyclerViews() {
+        mLinearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        mSearchPlacesRecyclerView.setLayoutManager(mLinearLayoutManager);
+        mSearchPlacesRecyclerView.setAdapter(mSearchPlacesAdapter);
+    }
+
     @Override
     public void onConnected() {
-        Toast.makeText(getContext(), "Google Services is Available now", Toast.LENGTH_SHORT).show();
-
+        mIsGooglePlayServicesConnected = true;
     }
 
     @Override
     public void onDisconnected() {
-        Toast.makeText(getContext(), "Google Services is NOT Available now", Toast.LENGTH_SHORT).show();
+        mIsGooglePlayServicesConnected = false;
+    }
 
+    private void closeKeyboard() {
+        View view = getActivity().getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity().
+                    getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 }

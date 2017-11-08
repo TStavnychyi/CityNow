@@ -88,6 +88,11 @@ public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.PlacesItem
         mPlacePredictions.clear();
     }
 
+    public void clearListAndNotifyDataChanged() {
+        clearList();
+        notifyDataSetChanged();
+    }
+
     class LoadingViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.rv_loading_progressBar)
         ProgressBar mProgressBar;

@@ -15,9 +15,14 @@ public class CommonUtils {
 
     private static final String TAG = "CommonUtils";
 
+    public static final int NO_INTERNET_ID = 1;
+
+    public static final int NO_DATA = 2;
+
     private CommonUtils() {
 
     }
+
 
     public static ProgressDialog showLoadingDialog(Context context) {
         ProgressDialog progressDialog = new ProgressDialog(context);

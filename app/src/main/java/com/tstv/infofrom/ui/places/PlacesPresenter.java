@@ -44,6 +44,8 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
 
     private boolean isLoading;
 
+    private String placeType;
+
     private boolean isListLoadedEnough;
 
     private List<PlacePrediction> mSearchViewPlaces = new ArrayList<>();
@@ -68,9 +70,8 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
         mNearbyPlacesApi = nearbyPlacesApi;
     }
 
-    void loadData(ProgressType progressType, boolean isLocationDataAlreadyLoaded) {
-        Log.e("TAG", "PlacesPresenter loadData()");
-        final int[] i = {0};
+    void loadData(ProgressType progressType, boolean isLocationDataAlreadyLoaded, String searchType) {
+        placeType = searchType;
         if (!isLocationDataAlreadyLoaded) {
             createLocationDataObservable()
                     .subscribeOn(Schedulers.io())
@@ -93,27 +94,33 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
         switch (progressType) {
             case DataProgress:
                 Log.e("TAG", "loadData DataProgress");
-                i[0] = 0;
-                createNearbyPlacesDataObservable()
+                createNearbyPlacesDataObservable(searchType)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(items -> {
-                            i[0]++;
-                            mSearchViewPlaces.add(items);
-                            mNearbyPlaces.add(items);
-                            mPlacesAdapter.setItems(mSearchViewPlaces);
-                            if (mPlacesAdapter.isListLoadedEnough()) {
-                                isListLoadedEnough = true;
-                                hideRecyclerViewProgressBar();
+                        .doOnSubscribe(disposable -> {
+                            isLoading = true;
+                            if (isLocationDataAlreadyLoaded) {
+                                showRecyclerViewProgressBar();
                             }
-
+                        })
+                        .doFinally(() -> isLoading = false)
+                        .filter(item -> item.getType().equals(placeType))
+                        .subscribe(items -> {
+                            if (items != null) {
+                                mNearbyPlaces.add(items);
+                                mPlacesAdapter.setItems(mNearbyPlaces);
+                                if (mPlacesAdapter.isListLoadedEnough()) {
+                                    isListLoadedEnough = true;
+                                    hideRecyclerViewProgressBar();
+                                }
+                            }
                         }, error -> {
-                            Log.e(TAG, "loadDataProgress erorr - " + error);
-                        });
+                            Log.e(TAG, "nearbyPlaces onError");
+                            isLoading = false;
+                        }, () -> isLoading = false);
                 break;
             case TextAutoComplete:
                 Log.e("TAG", "loadData TextAutoComplete");
-                i[0] = 0;
                 createSearchDataObservable()
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -123,7 +130,6 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
                                 }
                         )
                         .subscribe(obj -> {
-                            i[0]++;
                             mSearchViewPlaces.add(obj);
                             mPlacesAdapter.setItems(mSearchViewPlaces);
                             if (mPlacesAdapter.isListLoadedEnough()) {
@@ -133,7 +139,6 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
                 break;
 
         }
-
     }
 
     private Observable<PlacePrediction> createLocationDataObservable() {
@@ -147,17 +152,17 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
                 .map((imageUrl) -> new PlacePrediction(currentCity, imageUrl));
     }
 
-    private Observable<PlacePrediction> createNearbyPlacesDataObservable() {
+    private Observable<PlacePrediction> createNearbyPlacesDataObservable(String placesType) {
         String currentLatLng = Utils.getStringLatLngFromDouble(MyApplication.getCurrentLtdLng());
         int radius = 10000;
-        String placesType = "cafe";
         return mNearbyPlacesApi.get(currentLatLng, radius, placesType, WEB_PLACES_API)
                 .flatMap(full -> Observable.fromIterable(full.getResults()))
                 .map((item) -> new PlacePrediction(
                         item.getPlaceId(),
                         item.getName(),
                         item.getVicinity(),
-                        getPlacePhoto(item.getPlaceId())
+                        getPlacePhoto(item.getPlaceId()),
+                        placesType
                 ));
     }
 
@@ -177,7 +182,7 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
                     Bitmap photoPlace = getPlacePhoto(prediction.getPlaceId());
                     sub.onNext(
                             new PlacePrediction(prediction.getPlaceId(), (String) prediction.getPrimaryText(null),
-                                    (String) prediction.getSecondaryText(null), photoPlace)
+                                    (String) prediction.getSecondaryText(null), photoPlace, placeType)
                     );
                 }
             }
@@ -267,5 +272,26 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
                 getViewState().hideDataProgress();
                 break;
         }
+    }
+
+    void clearPlacesAdapterData() {
+        mNearbyPlaces.clear();
+        mPlacesAdapter.clearListAndNotifyDataChanged();
+    }
+
+    public String getPlaceType() {
+        return placeType;
+    }
+
+    public void setPlaceType(String placeType) {
+        this.placeType = placeType;
+    }
+
+    boolean isLoading() {
+        return isLoading;
+    }
+
+    public void setLoading(boolean loading) {
+        isLoading = loading;
     }
 }

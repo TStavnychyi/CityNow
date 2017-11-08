@@ -106,7 +106,7 @@ public class WeatherFragment extends BaseFragment implements WeatherView {
                 requestSingleUpdate();
             }
         } else {
-            getBaseActivity().showError(getString(R.string.no_internet_connection_message));
+            getBaseActivity().showMessage(getString(R.string.no_internet_connection_message));
         }
 
 
@@ -260,6 +260,8 @@ public class WeatherFragment extends BaseFragment implements WeatherView {
         MyApplication.setCurrentLtdLng(coordinates);
         String city = Utils.getCityFromLatLng(coordinates, getContext());
         MyApplication.setCurrentCity(city);
+       /* String country = Utils.getCountryCodeFromLatLng(coordinates, getContext());
+        MyApplication.setCurrentCountry(country);*/
     }
 
 }

@@ -7,12 +7,8 @@ import com.tstv.infofrom.ui.base.BaseView;
  */
 
 interface SearchPlacesView extends BaseView {
-
-    void showCategoriesRecyclerView();
-
-    void hideCategoriesRecyclerView();
-
     void showSearchPlacesRecyclerView();
 
     void hideSearchPlacesRecyclerView();
+
 }

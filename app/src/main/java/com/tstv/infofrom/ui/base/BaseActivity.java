@@ -27,6 +27,9 @@ import com.tstv.infofrom.common.utils.NetworkUtils;
 
 import javax.inject.Inject;
 
+import static com.tstv.infofrom.common.google.GooglePlacesServicesHelper.REQUEST_CODE_AVAILABILITY;
+import static com.tstv.infofrom.common.google.GooglePlacesServicesHelper.REQUEST_CODE_RESOLUTION;
+
 /**
  * Created by tstv on 15.09.2017.
  */
@@ -99,7 +102,11 @@ public abstract class BaseActivity extends MvpAppCompatActivity implements BaseV
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        mGooglePlacesServicesHelper.handleActivityResult(requestCode, resultCode, data, getBaseActivity());
+        if (requestCode == REQUEST_CODE_RESOLUTION || requestCode == REQUEST_CODE_AVAILABILITY) {
+            mGooglePlacesServicesHelper.handleActivityResult(requestCode, resultCode, data, getBaseActivity());
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 
     @Override
@@ -170,9 +177,9 @@ public abstract class BaseActivity extends MvpAppCompatActivity implements BaseV
     @Override
     public void showMessage(String message) {
         if (message != null) {
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
         } else {
-            Toast.makeText(this, getString(R.string.some_error), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.some_error), Toast.LENGTH_LONG).show();
         }
     }
 

@@ -142,7 +142,9 @@ public abstract class BaseFragment extends MvpAppCompatFragment implements BaseV
 
     @Override
     public void showMessage(String message) {
-
+        if (mActivity != null) {
+            mActivity.showMessage(message);
+        }
     }
 
    /* @Override
@@ -152,7 +154,7 @@ public abstract class BaseFragment extends MvpAppCompatFragment implements BaseV
 
     @Override
     public void hideKeyboard() {
-
+        mActivity.hideKeyboard();
     }
 
     public interface Callback {

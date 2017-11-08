@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/activity_categories"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context="com.tstv.infofrom.ui.places.categories.CategoriesActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar_categories_places"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary"
+        app:theme="@style/WhiteToolbar"
+        />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/search_places_categories_rv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/toolbar_categories_places"
+        />
+
+</RelativeLayout>
