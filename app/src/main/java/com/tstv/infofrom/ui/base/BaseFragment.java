@@ -9,7 +9,6 @@ import android.support.v4.app.Fragment;
 import android.util.Log;
 
 import com.arellomobile.mvp.MvpAppCompatFragment;
-import com.tstv.infofrom.common.google.GooglePlacesServicesHelper;
 import com.tstv.infofrom.ui.places.detail_places.PlacesDetailActivity;
 import com.tstv.infofrom.ui.places.search_places.SearchPlacesActivity;
 
@@ -99,20 +98,6 @@ public abstract class BaseFragment extends MvpAppCompatFragment implements BaseV
             mActivity = activity;
             activity.onFragmentAttached();
         }
-    }
-
-    public GooglePlacesServicesHelper getGooglePlacesServicesHelper() {
-        if (mActivity != null) {
-            return mActivity.getGooglePlacesServicesHelper();
-        }
-        return null;
-    }
-
-    public boolean isGooglePlacesServicesConnected() {
-        if (mActivity != null) {
-            return mActivity.isGooglePlayServicesConnected();
-        }
-        return false;
     }
 
     @Override

@@ -154,6 +154,7 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
 
     private Observable<PlacePrediction> createNearbyPlacesDataObservable(String placesType) {
         String currentLatLng = Utils.getStringLatLngFromDouble(MyApplication.getCurrentLtdLng());
+        Log.e(TAG, "currentLaatLng : " + currentLatLng);
         int radius = 10000;
         return mNearbyPlacesApi.get(currentLatLng, radius, placesType, WEB_PLACES_API)
                 .flatMap(full -> Observable.fromIterable(full.getResults()))
@@ -248,6 +249,7 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
     public void onLoadingFailed(Throwable throwable) {
         getViewState().showError(throwable.getMessage());
         throwable.printStackTrace();
+        hideProgress(ProgressType.DataProgress);
     }
 
     @Override

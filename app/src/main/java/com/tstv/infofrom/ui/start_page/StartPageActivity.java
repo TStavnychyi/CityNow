@@ -1,14 +1,11 @@
-package com.tstv.infofrom.ui.main_page;
+package com.tstv.infofrom.ui.start_page;
 
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Criteria;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -19,10 +16,10 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -32,24 +29,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.arellomobile.mvp.MvpAppCompatActivity;
+import com.arellomobile.mvp.presenter.InjectPresenter;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.maps.model.LatLng;
 import com.tstv.infofrom.MyApplication;
 import com.tstv.infofrom.R;
 import com.tstv.infofrom.common.google.GooglePlacesServicesHelper;
 import com.tstv.infofrom.common.utils.CommonUtils;
 import com.tstv.infofrom.common.utils.NetworkUtils;
-import com.tstv.infofrom.common.utils.Utils;
+import com.tstv.infofrom.model.places.auto_complete.CityPrediction;
+import com.tstv.infofrom.ui.base.BaseView;
 import com.tstv.infofrom.ui.base.MainActivity;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,16 +49,14 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.BehaviorSubject;
 
 import static com.tstv.infofrom.common.google.GooglePlacesServicesHelper.REQUEST_CODE_AVAILABILITY;
 import static com.tstv.infofrom.common.google.GooglePlacesServicesHelper.REQUEST_CODE_RESOLUTION;
 
-public class MainPageActivity extends MvpAppCompatActivity implements GooglePlacesServicesHelper.GoogleServicesListener {
+public class StartPageActivity extends MvpAppCompatActivity implements BaseView, GooglePlacesServicesHelper.GoogleServicesListener {
 
-    private static final String TAG = MainPageActivity.class.getSimpleName();
+    private static final String TAG = StartPageActivity.class.getSimpleName();
 
     private static final int REQUEST_LOCATION_PERMISSIONS = 1;
 
@@ -83,12 +72,12 @@ public class MainPageActivity extends MvpAppCompatActivity implements GooglePlac
     @OnClick(R.id.btn_main_page_current_location)
     public void onClick() {
         if (isNetworkConnected) {
-            if (ContextCompat.checkSelfPermission(MainPageActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)
+            if (ContextCompat.checkSelfPermission(StartPageActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(MainPageActivity.this,
+                ActivityCompat.requestPermissions(StartPageActivity.this,
                         locationPermission, REQUEST_LOCATION_PERMISSIONS);
             } else {
-                getCurrentLocation();
+                mPresenter.getCurrentLocation(StartPageActivity.this, mLocationListener);
             }
         } else {
             showMessage(getString(R.string.no_internet_connection_message));
@@ -98,6 +87,9 @@ public class MainPageActivity extends MvpAppCompatActivity implements GooglePlac
     @Inject
     GooglePlacesServicesHelper mGooglePlacesServicesHelper;
 
+    @InjectPresenter
+    StartPagePresenter mPresenter;
+
     private ProgressDialog mProgressDialog;
 
     private PlacesAutoCompleteAdapter mAdapter;
@@ -106,16 +98,17 @@ public class MainPageActivity extends MvpAppCompatActivity implements GooglePlac
 
     private boolean isNetworkConnected;
 
-    private MyLocationListener mLocationListener = this::rxGetCurrentLocation;
-
-    private String API_KEY = "AIzaSyBegZt-KrWSxlhBpvvGbRyR8u0bPn7Xahc";
-
-    private static final String PLACES_API_BASE = "https://maps.googleapis.com/maps/api/place";
-    private static final String TYPE_AUTOCOMPLETE = "/autocomplete";
-    private static final String OUT_JSON = "/json";
+    private MyLocationListener mLocationListener = new MyLocationListener() {
+        @Override
+        public void locationIsReady(Location location) {
+            mPresenter.rxGetCurrentLocation(location, StartPageActivity.this);
+        }
+    };
 
     private HandlerThread mHandlerThread;
     private Handler mThreadHandler;
+
+    private BehaviorSubject<Place> placeSubject = BehaviorSubject.create();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,6 +121,8 @@ public class MainPageActivity extends MvpAppCompatActivity implements GooglePlac
 
         MyApplication.get().getActivityComponent().inject(this);
 
+        mPresenter.loadVariables(mGooglePlacesServicesHelper);
+
         mAdapter = new PlacesAutoCompleteAdapter(this, R.layout.item_autocomplete);
 
         isNetworkConnected = NetworkUtils.isNetworkConnected(this);
@@ -138,7 +133,9 @@ public class MainPageActivity extends MvpAppCompatActivity implements GooglePlac
             showMessage(getString(R.string.no_internet_connection_message));
         }
 
-        setAutoCompleteComponents();
+        setAutoCompleteTextViewComponents();
+
+        createAutoCompleteSubject();
     }
 
     @Override
@@ -157,7 +154,7 @@ public class MainPageActivity extends MvpAppCompatActivity implements GooglePlac
         switch (requestCode) {
             case REQUEST_LOCATION_PERMISSIONS:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    getCurrentLocation();
+                    mPresenter.getCurrentLocation(StartPageActivity.this, mLocationListener);
                 } else {
                     showMessage("Make sure you enable location permission");
                 }
@@ -188,18 +185,50 @@ public class MainPageActivity extends MvpAppCompatActivity implements GooglePlac
         mIsGooglePlayServicesConnected = false;
     }
 
-    private void showDataProgress() {
+    @Override
+    public void showRefreshing() {
+
+    }
+
+    @Override
+    public void hideRefreshing() {
+
+    }
+
+    @Override
+    public void showDataProgress() {
         hideDataProgress();
         mProgressDialog = CommonUtils.showLoadingDialog(this);
     }
 
-    private void hideDataProgress() {
+    @Override
+    public void hideDataProgress() {
         if (mProgressDialog != null && mProgressDialog.isShowing()) {
             mProgressDialog.cancel();
         }
     }
 
-    private void setAutoCompleteComponents() {
+    @Override
+    public void showError(String message) {
+        showMessage(message);
+    }
+
+    @Override
+    public void showMessage(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void hideKeyboard() {
+        View view = this.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager)
+                    getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
+    private void setAutoCompleteTextViewComponents() {
         if (mThreadHandler == null) {
             mHandlerThread = new HandlerThread(TAG, android.os.Process.THREAD_PRIORITY_BACKGROUND);
             mHandlerThread.start();
@@ -207,12 +236,12 @@ public class MainPageActivity extends MvpAppCompatActivity implements GooglePlac
                 @Override
                 public void handleMessage(Message msg) {
                     if (msg.what == 1) {
-                        ArrayList<String> results = (ArrayList<String>) mAdapter.resultList;
+                        ArrayList<CityPrediction> results = (ArrayList<CityPrediction>) mAdapter.resultList;
 
                         if (results != null && results.size() > 0) {
-                            mAdapter.notifyDataSetChanged();
+                            runOnUiThread(() -> mAdapter.notifyDataSetChanged());
                         } else {
-                            mAdapter.notifyDataSetInvalidated();
+                            runOnUiThread(() -> mAdapter.notifyDataSetInvalidated());
                         }
                     }
                 }
@@ -234,9 +263,9 @@ public class MainPageActivity extends MvpAppCompatActivity implements GooglePlac
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 mThreadHandler.removeCallbacksAndMessages(null);
                 mThreadHandler.postDelayed(() -> {
-                    mAdapter.resultList = autocomplete(s.toString());
+                    mAdapter.resultList = mPresenter.autocomplete(s.toString());
                     if (mAdapter.resultList.size() > 0) {
-                        mAdapter.resultList.add("footer");
+                        mAdapter.resultList.add(null);
                         mThreadHandler.sendEmptyMessage(1);
                     }
                 }, 500);
@@ -250,76 +279,16 @@ public class MainPageActivity extends MvpAppCompatActivity implements GooglePlac
         });
 
         mEtByCitySearch.setOnItemClickListener((parent, view, position, id) -> {
-            String chooseCity = (String) parent.getItemAtPosition(position);
-            getAutoCompleteLocationData(chooseCity);
-            startMainActivity();
+            CityPrediction chooseCity = (CityPrediction) parent.getItemAtPosition(position);
+            mEtByCitySearch.setText(chooseCity.getDescription());
+            showDataProgress();
+            if (isNetworkConnected) {
+                mPresenter.getAutoCompleteLocationData(chooseCity, placeSubject);
+            } else {
+                showMessage(getString(R.string.no_internet_connection_message));
+            }
         });
-    }
-
-    private void getCurrentLocation() throws SecurityException {
-        final LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-        if (isNetworkEnabled) {
-            Criteria criteria = new Criteria();
-            criteria.setAccuracy(Criteria.ACCURACY_COARSE);
-            locationManager.requestSingleUpdate(criteria, new LocationListener() {
-                @Override
-                public void onLocationChanged(Location location) {
-                    if (location != null) {
-                        mLocationListener.locationIsReady(location);
-                    } else {
-                        showMessage("Can't find current location!");
-                    }
-                }
-
-                @Override
-                public void onStatusChanged(String provider, int status, Bundle extras) {
-                }
-
-                @Override
-                public void onProviderEnabled(String provider) {
-                }
-
-                @Override
-                public void onProviderDisabled(String provider) {
-                    showMessage("Make sure to enable Internet on your phone");
-                }
-            }, null);
-        }
-    }
-
-    private void rxGetCurrentLocation(Location location) {
-        Observable.just(location)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe((disposable -> showDataProgress()))
-                .doFinally(() -> {
-                    hideDataProgress();
-                    startMainActivity();
-                })
-                .subscribe((this::getCurrentLocationData), error -> {
-                    hideDataProgress();
-                    showMessage(error.getMessage());
-
-                });
-    }
-
-    private void getAutoCompleteLocationData(String cityName) {
-        Double[] coordinates = Utils.getLatLngFromCityName(cityName, this);
-        String country = Utils.getCountryCodeFromLatLng(coordinates, this);
-        MyApplication.setCurrentCity(cityName);
-        MyApplication.setCurrentCountry(country);
-        MyApplication.setCurrentLtdLng(coordinates);
-    }
-
-
-    private void getCurrentLocationData(Location location) {
-        Double[] coordinates = {location.getLatitude(), location.getLongitude()};
-        MyApplication.setCurrentLtdLng(coordinates);
-        String city = Utils.getCityFromLatLng(coordinates, this);
-        MyApplication.setCurrentCity(city);
-        String country = Utils.getCountryCodeFromLatLng(coordinates, this);
-        MyApplication.setCurrentCountry(country);
+        
     }
 
     private void startMainActivity() {
@@ -327,60 +296,23 @@ public class MainPageActivity extends MvpAppCompatActivity implements GooglePlac
         startActivity(intent);
     }
 
-    private ArrayList<String> autocomplete(String input) {
-        ArrayList<String> resultList = null;
-        HttpURLConnection conn = null;
-        StringBuilder jsonResults = new StringBuilder();
-
-        try {
-            StringBuilder sb = new StringBuilder(PLACES_API_BASE + TYPE_AUTOCOMPLETE + OUT_JSON);
-            sb.append("?key=" + API_KEY);
-            sb.append("&types=(cities)");
-            sb.append("&input=" + URLEncoder.encode(input, "utf8"));
-
-            URL url = new URL(sb.toString());
-            conn = (HttpURLConnection) url.openConnection();
-            InputStreamReader in = new InputStreamReader(conn.getInputStream());
-
-            int read;
-            char[] buff = new char[1024];
-            while ((read = in.read(buff)) != -1) {
-                jsonResults.append(buff, 0, read);
-            }
-        } catch (MalformedURLException e) {
-            Log.e(TAG, "Error processing Places API URL", e);
-            return resultList;
-        } catch (IOException e) {
-            Log.e(TAG, "Error connecting to Places API", e);
-            return resultList;
-        } finally {
-            if (conn != null) {
-                conn.disconnect();
-            }
-        }
-        try {
-
-            JSONObject jsonObj = new JSONObject(jsonResults.toString());
-            JSONArray predsJsonArray = jsonObj.getJSONArray("predictions");
-
-            resultList = new ArrayList<>(predsJsonArray.length());
-            for (int i = 0; i < predsJsonArray.length(); i++) {
-                resultList.add(predsJsonArray.getJSONObject(i).getString("description"));
-            }
-        } catch (JSONException e) {
-            Log.e(TAG, "Cannot process JSON results", e);
-        }
-
-        return resultList;
+    private void createAutoCompleteSubject() {
+        placeSubject
+                .subscribe(placeObj -> {
+                    LatLng latLng = placeObj.getLatLng();
+                    Double[] coordinates = {latLng.latitude, latLng.longitude};
+                    if (coordinates != null) {
+                        MyApplication.setCurrentLtdLng(coordinates);
+                    }
+                    hideDataProgress();
+                    startMainActivity();
+                });
     }
 
-    private void showMessage(String text) {
-        Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
-    }
 
-    public class PlacesAutoCompleteAdapter extends ArrayAdapter<String> implements Filterable {
+    public class PlacesAutoCompleteAdapter extends ArrayAdapter<CityPrediction> implements Filterable {
 
-        List<String> resultList;
+        List<CityPrediction> resultList;
 
         Context mContext;
 
@@ -408,7 +340,7 @@ public class MainPageActivity extends MvpAppCompatActivity implements GooglePlac
 
             if (position != (resultList.size() - 1)) {
                 TextView autocompleteTextView = (TextView) view.findViewById(R.id.autocompleteTextView);
-                autocompleteTextView.setText(resultList.get(position));
+                autocompleteTextView.setText(resultList.get(position).getDescription());
             } else {
                 ImageView imageView = (ImageView) view.findViewById(R.id.iv_powered_by_google);
             }
@@ -423,7 +355,7 @@ public class MainPageActivity extends MvpAppCompatActivity implements GooglePlac
 
         @Nullable
         @Override
-        public String getItem(int position) {
+        public CityPrediction getItem(int position) {
             return resultList.get(position);
         }
     }

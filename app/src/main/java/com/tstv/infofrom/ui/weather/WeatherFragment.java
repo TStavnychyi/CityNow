@@ -1,16 +1,7 @@
 package com.tstv.infofrom.ui.weather;
 
-import android.Manifest;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.location.Criteria;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
@@ -40,8 +31,6 @@ import butterknife.ButterKnife;
  */
 
 public class WeatherFragment extends BaseFragment implements WeatherView {
-
-    private static final int REQUEST_LOCATION_PERMISSIONS = 1;
 
     public static final String TAG = WeatherFragment.class.getSimpleName();
 
@@ -78,10 +67,8 @@ public class WeatherFragment extends BaseFragment implements WeatherView {
     @Inject
     WeatherApi mWeatherApi;
 
-    private final String[] locationPermission = {
-            Manifest.permission.ACCESS_FINE_LOCATION};
-
     private boolean isNetworkConnected;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,18 +84,17 @@ public class WeatherFragment extends BaseFragment implements WeatherView {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_temperature, container, false);
+        View view = inflater.inflate(R.layout.fragment_weather, container, false);
 
         if (isNetworkConnected) {
-            if (ActivityCompat.checkSelfPermission(getBaseActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(locationPermission, REQUEST_LOCATION_PERMISSIONS);
+            if (MyApplication.getCurrentCity() != null && !MyApplication.getCurrentCity().isEmpty()) {
+                Log.e(TAG, "Current City" + MyApplication.getCurrentCity());
+                mPresenter.loadVariables(mWeatherApi, MyApplication.getCurrentCity());
+                mPresenter.loadStart();
             } else {
-                requestSingleUpdate();
+                getBaseActivity().showMessage("Can't find current location");
             }
-        } else {
-            getBaseActivity().showMessage(getString(R.string.no_internet_connection_message));
         }
-
 
         return view;
     }
@@ -150,7 +136,7 @@ public class WeatherFragment extends BaseFragment implements WeatherView {
 
     @Override
     protected int getMainContentLayout() {
-        return R.layout.fragment_temperature;
+        return R.layout.fragment_weather;
     }
 
     @Override
@@ -200,68 +186,4 @@ public class WeatherFragment extends BaseFragment implements WeatherView {
         Utils.backgroundImage(data.getCurrent().getIsDay(), iv_background_image);
 
     }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case REQUEST_LOCATION_PERMISSIONS:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (ActivityCompat.checkSelfPermission(getBaseActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                        requestSingleUpdate();
-                    }
-                } else {
-
-                }
-                break;
-            default:
-                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
-    }
-
-    private void requestSingleUpdate() throws SecurityException {
-        final LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-        if (isNetworkEnabled) {
-            Criteria criteria = new Criteria();
-            criteria.setAccuracy(Criteria.ACCURACY_COARSE);
-            locationManager.requestSingleUpdate(criteria, new LocationListener() {
-                @Override
-                public void onLocationChanged(Location location) {
-                    Log.e("TAG", "Location : " + location.getLatitude());
-                    getLocationData(location);
-                    if (MyApplication.getCurrentCity() != null && !MyApplication.getCurrentCity().isEmpty()) {
-                        mPresenter.loadVariables(mWeatherApi, MyApplication.getCurrentCity());
-                        mPresenter.loadStart();
-                    } else {
-                        Toast.makeText(getActivity(), "Can't find current location", Toast.LENGTH_SHORT).show();
-                    }
-                }
-
-                @Override
-                public void onStatusChanged(String provider, int status, Bundle extras) {
-                }
-
-                @Override
-                public void onProviderEnabled(String provider) {
-                }
-
-                @Override
-                public void onProviderDisabled(String provider) {
-                    getBaseActivity().hideDataProgress();
-                    Toast.makeText(getBaseActivity(), "Make sure to enable Internet on your phone", Toast.LENGTH_SHORT).show();
-                }
-            }, null);
-        }
-    }
-
-    private void getLocationData(Location location) {
-        Double[] coordinates = {location.getLatitude(), location.getLongitude()};
-        MyApplication.setCurrentLtdLng(coordinates);
-        String city = Utils.getCityFromLatLng(coordinates, getContext());
-        MyApplication.setCurrentCity(city);
-       /* String country = Utils.getCountryCodeFromLatLng(coordinates, getContext());
-        MyApplication.setCurrentCountry(country);*/
-    }
-
 }

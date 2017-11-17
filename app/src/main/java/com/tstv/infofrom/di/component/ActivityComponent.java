@@ -6,6 +6,7 @@ import com.tstv.infofrom.di.module.RestModule;
 import com.tstv.infofrom.di.scopes.PerActivity;
 import com.tstv.infofrom.ui.base.BaseActivity;
 import com.tstv.infofrom.ui.base.MainActivity;
+import com.tstv.infofrom.ui.start_page.StartPageActivity;
 import com.tstv.infofrom.ui.places.PlacesFragment;
 import com.tstv.infofrom.ui.places.categories.CategoriesActivity;
 import com.tstv.infofrom.ui.places.detail_places.PlacesDetailFragment;
@@ -27,6 +28,8 @@ public interface ActivityComponent {
     void inject(CategoriesActivity activity);
 
     void inject(MainActivity activity);
+
+    void inject(StartPageActivity activity);
 
     void inject(WeatherFragment fragment);
 

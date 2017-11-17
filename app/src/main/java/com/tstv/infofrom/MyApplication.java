@@ -15,7 +15,6 @@ import com.tstv.infofrom.di.module.ActivityModule;
 import com.tstv.infofrom.di.module.ApplicationModule;
 import com.tstv.infofrom.di.module.GoogleLocationServicesModule;
 import com.tstv.infofrom.di.module.GooglePlacesServicesModule;
-import com.tstv.infofrom.ui.base.BaseActivity;
 import com.tstv.infofrom.ui.base.BaseFragment;
 import com.tstv.infofrom.ui.places.PlacesPresenter;
 
@@ -44,7 +43,11 @@ public class MyApplication extends Application {
 
     private static String currentCity;
 
+    private static String currentCountryCode;
+
     private static String currentCountry;
+
+    private static boolean isGooglePlacesServicesConnected;
 
 
     @Inject
@@ -76,7 +79,7 @@ public class MyApplication extends Application {
                 .applicationModule(new ApplicationModule(this)).build();
     }
 
-    public ActivityComponent plusActivityComponent(BaseActivity activity, MvpAppCompatActivity listener) {
+    public ActivityComponent plusActivityComponent(MvpAppCompatActivity activity, MvpAppCompatActivity listener) {
         mActivityComponent = DaggerActivityComponent.builder()
                 .activityModule(new ActivityModule(activity))
                 .googlePlacesServicesModule(new GooglePlacesServicesModule(activity, listener))
@@ -142,6 +145,22 @@ public class MyApplication extends Application {
 
     public static void setCurrentCountry(String currentCountry) {
         MyApplication.currentCountry = currentCountry;
+    }
+
+    public static String getCurrentCountryCode() {
+        return currentCountryCode;
+    }
+
+    public static void setCurrentCountryCode(String currentCountryCode) {
+        MyApplication.currentCountryCode = currentCountryCode;
+    }
+
+    public static boolean isGooglePlacesServicesConnected() {
+        return isGooglePlacesServicesConnected;
+    }
+
+    public static void setIsGooglePlacesServicesConnected(boolean isGooglePlacesServicesConnected) {
+        MyApplication.isGooglePlacesServicesConnected = isGooglePlacesServicesConnected;
     }
 }
 

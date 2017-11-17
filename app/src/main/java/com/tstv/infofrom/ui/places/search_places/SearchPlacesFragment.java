@@ -45,7 +45,7 @@ import static android.app.Activity.RESULT_OK;
  * Created by tstv on 24.10.2017.
  */
 
-public class SearchPlacesFragment extends BaseFragment implements SearchPlacesView, GooglePlacesServicesHelper.GoogleServicesListener {
+public class SearchPlacesFragment extends BaseFragment implements SearchPlacesView {
 
     private static final String TAG = SearchPlacesFragment.class.getSimpleName();
 
@@ -72,26 +72,15 @@ public class SearchPlacesFragment extends BaseFragment implements SearchPlacesVi
     @Inject
     LinearLayoutManager mLinearLayoutManager;
 
-    // @Inject
+    @Inject
     GooglePlacesServicesHelper mGooglePlacesServicesHelper;
-
-    boolean mIsGooglePlayServicesConnected = false;
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         MyApplication.get().getActivityComponent().inject(this);
-        mGooglePlacesServicesHelper = new GooglePlacesServicesHelper(getActivity(), this);
-        mGooglePlacesServicesHelper.connect();
 
-      /*  try {
-            startActivityForResult(builder.build(getActivity()), PLACE_PICKER_REQUEST);
-        } catch (GooglePlayServicesRepairableException e) {
-            e.printStackTrace();
-        } catch (GooglePlayServicesNotAvailableException e) {
-            e.printStackTrace();
-        }*/
+        mGooglePlacesServicesHelper.connect();
     }
 
     @Nullable
@@ -116,6 +105,7 @@ public class SearchPlacesFragment extends BaseFragment implements SearchPlacesVi
     @Override
     public void onDestroy() {
         super.onDestroy();
+        mGooglePlacesServicesHelper.disconnect();
     }
 
     @Override
@@ -263,16 +253,6 @@ public class SearchPlacesFragment extends BaseFragment implements SearchPlacesVi
         mLinearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         mSearchPlacesRecyclerView.setLayoutManager(mLinearLayoutManager);
         mSearchPlacesRecyclerView.setAdapter(mSearchPlacesAdapter);
-    }
-
-    @Override
-    public void onConnected() {
-        mIsGooglePlayServicesConnected = true;
-    }
-
-    @Override
-    public void onDisconnected() {
-        mIsGooglePlayServicesConnected = false;
     }
 
     private void closeKeyboard() {

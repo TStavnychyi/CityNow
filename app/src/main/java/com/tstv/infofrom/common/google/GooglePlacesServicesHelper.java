@@ -15,6 +15,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlacePicker;
+import com.tstv.infofrom.MyApplication;
 
 import static android.app.Activity.RESULT_OK;
 import static com.tstv.infofrom.ui.base.BaseActivity.PLACE_PICKER_REQUEST;
@@ -54,16 +55,15 @@ public class GooglePlacesServicesHelper implements GoogleApiClient.ConnectionCal
     }
 
     public void connect() {
-        Log.e(TAG, "GooglePlacesServicesHelper connect()");
         if (isGooglePlayServicesAvailable()) {
             apiClient.connect();
+            MyApplication.setIsGooglePlacesServicesConnected(true);
         } else {
             listener.onDisconnected();
         }
     }
 
     public void disconnect() {
-        Log.e(TAG, "GooglePlacesServicesHelper disconnect()");
         if (isGooglePlayServicesAvailable()) {
             apiClient.disconnect();
         } else {

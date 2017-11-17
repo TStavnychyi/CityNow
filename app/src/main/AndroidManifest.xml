@@ -18,11 +18,6 @@
         <activity
             android:name=".ui.base.MainActivity"
             android:configChanges="orientation|keyboardHidden|screenSize">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
         </activity>
 
         <meta-data
@@ -39,6 +34,15 @@
             android:resource="@xml/searchable"/>
 
         <activity android:name=".ui.places.categories.CategoriesActivity">
+        </activity>
+        <activity
+            android:name=".ui.start_page.StartPageActivity"
+            android:windowSoftInputMode="stateHidden|adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
         </activity>
     </application>
 

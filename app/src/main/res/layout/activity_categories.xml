@@ -7,13 +7,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
+    android:background="@color/theme_primary_dark"
     tools:context="com.tstv.infofrom.ui.places.categories.CategoriesActivity">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/background_categories"
+        android:scaleType="centerCrop"
+        />
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar_categories_places"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/colorPrimary"
+        android:background="@color/theme_primary"
         app:theme="@style/WhiteToolbar"
         />
 
@@ -22,6 +30,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/toolbar_categories_places"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
         />
 
 </RelativeLayout>
