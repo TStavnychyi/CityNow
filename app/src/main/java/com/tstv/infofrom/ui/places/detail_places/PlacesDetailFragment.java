@@ -270,23 +270,6 @@ public class PlacesDetailFragment extends BaseFragment implements PlacesDetailVi
         return view;
     }
 
-  /*  @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        ButterKnife.bind(this, view);
-
-        mProgressBar = getPlacesDetailActivity().getPlacesProgressBar();
-
-        setHasOptionsMenu(true);
-
-        initToolbar();
-
-        initRecyclerViews();
-
-        mPresenter.loadStart();
-    }*/
-
     @Override
     protected int getMainContentLayout() {
         return R.layout.fragment_places_detail;
@@ -498,7 +481,6 @@ public class PlacesDetailFragment extends BaseFragment implements PlacesDetailVi
     private void initToolbar() {
         mAppBarLayout.addOnOffsetChangedListener(this);
         ((MvpAppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-        //    toolbar.setPadding(0, getStatusBarHeight(), 0, 0);
         getActivity().setTitle(null);
         if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
             ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -532,14 +514,5 @@ public class PlacesDetailFragment extends BaseFragment implements PlacesDetailVi
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    public int getStatusBarHeight() {
-        int result = 0;
-        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            result = getResources().getDimensionPixelSize(resourceId);
-        }
-        return result;
     }
 }

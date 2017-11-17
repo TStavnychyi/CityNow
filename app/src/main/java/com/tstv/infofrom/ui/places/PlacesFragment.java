@@ -1,21 +1,13 @@
 package com.tstv.infofrom.ui.places;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.location.Criteria;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -42,7 +34,6 @@ import com.bumptech.glide.request.target.Target;
 import com.tstv.infofrom.MyApplication;
 import com.tstv.infofrom.R;
 import com.tstv.infofrom.common.google.GooglePlacesServicesHelper;
-import com.tstv.infofrom.common.utils.Utils;
 import com.tstv.infofrom.model.places.PlacePrediction;
 import com.tstv.infofrom.rest.api.NearbyPlacesApi;
 import com.tstv.infofrom.ui.base.BaseFragment;
@@ -111,6 +102,7 @@ public class PlacesFragment extends BaseFragment implements PlacesView, AppBarLa
     @Inject
     LinearLayoutManager mLayoutManager;
 
+    @Inject
     GooglePlacesServicesHelper mGooglePlacesServicesHelper;
 
     private boolean isInternetIsAvailable;
@@ -131,13 +123,11 @@ public class PlacesFragment extends BaseFragment implements PlacesView, AppBarLa
 
         MyApplication.get().getActivityComponent().inject(this);
 
-        mGooglePlacesServicesHelper = getGooglePlacesServicesHelper();
-        mIsGooglePlayServicesConnected = isGooglePlacesServicesConnected();
-
-
+        mGooglePlacesServicesHelper.connect();
+        mIsGooglePlayServicesConnected = MyApplication.isGooglePlacesServicesConnected();
         isInternetIsAvailable = getBaseActivity().isNetworkConnected();
 
-        if (isInternetIsAvailable) {
+        /*if (isInternetIsAvailable) {
             if (mIsGooglePlayServicesConnected) {
                 mPlacesPresenter.loadVariables(mPlacesAdapter, mGooglePlacesServicesHelper, mNearbyPlacesApi);
                 if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -148,7 +138,7 @@ public class PlacesFragment extends BaseFragment implements PlacesView, AppBarLa
             }
         } else {
             showMessage(getString(R.string.no_internet_connection_message));
-        }
+        }*/
     }
 
     @Override
@@ -167,6 +157,13 @@ public class PlacesFragment extends BaseFragment implements PlacesView, AppBarLa
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mPlacesAdapter);
         tv_places_title.setTypeface(getBoldItalicFont());
+
+        if (isInternetIsAvailable) {
+            mPlacesPresenter.loadVariables(mPlacesAdapter, mGooglePlacesServicesHelper, mNearbyPlacesApi);
+            mPlacesPresenter.loadData(BasePresenter.ProgressType.DataProgress, isLocationDataAlreadyUploaded, "establishment");
+        } else {
+            showMessage(getString(R.string.no_internet_connection_message));
+        }
 
         mPlacesPresenter.loadStart();
         return view;
@@ -214,7 +211,7 @@ public class PlacesFragment extends BaseFragment implements PlacesView, AppBarLa
         }
     }
 
-    @Override
+  /*  @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         switch (requestCode) {
@@ -230,7 +227,7 @@ public class PlacesFragment extends BaseFragment implements PlacesView, AppBarLa
             default:
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
-    }
+    }*/
 
     @Override
     protected int getMainContentLayout() {
@@ -305,14 +302,14 @@ public class PlacesFragment extends BaseFragment implements PlacesView, AppBarLa
         Toast.makeText(getBaseActivity(), message, Toast.LENGTH_SHORT).show();
     }
 
-    private void getLocationData(Location location) {
+  /*  private void getLocationData(Location location) {
         Double[] coordinates = {location.getLatitude(), location.getLongitude()};
         MyApplication.setCurrentLtdLng(coordinates);
         String city = Utils.getCityFromLatLng(coordinates, getContext());
         String country = Utils.getCountryCodeFromLatLng(coordinates, getContext());
-        MyApplication.setCurrentCountry(country);
+        MyApplication.setCurrentCountryCode(country);
         MyApplication.setCurrentCity(city);
-    }
+    }*/
 
     @Override
     public void setLocationData(PlacePrediction data) {
@@ -346,7 +343,7 @@ public class PlacesFragment extends BaseFragment implements PlacesView, AppBarLa
         mToolbar.setTitleTextColor(getResources().getColor(R.color.white));
     }
 
-    private void requestSingleUpdate() throws SecurityException {
+  /*  private void requestSingleUpdate() throws SecurityException {
         Log.e("TAG", "requestSingleUpdate");
         final LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
@@ -374,7 +371,7 @@ public class PlacesFragment extends BaseFragment implements PlacesView, AppBarLa
                 }
             }, null);
         }
-    }
+    }*/
 
     private Typeface getBoldItalicFont() {
         return Typeface.createFromAsset(getActivity().getAssets(), "Roboto_BoldItalic.ttf");

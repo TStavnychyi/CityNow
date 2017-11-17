@@ -1,8 +1,9 @@
 package com.tstv.infofrom.di.module;
 
+import android.support.v7.app.AppCompatActivity;
+
 import com.arellomobile.mvp.MvpAppCompatActivity;
 import com.tstv.infofrom.common.google.GooglePlacesServicesHelper;
-import com.tstv.infofrom.ui.base.BaseActivity;
 
 import dagger.Module;
 import dagger.Provides;
@@ -14,11 +15,11 @@ import dagger.Provides;
 @Module
 public class GooglePlacesServicesModule {
 
-    private BaseActivity googleServicesListener;
+    private AppCompatActivity googleServicesListener;
 
     private MvpAppCompatActivity mAppCompatActivity;
 
-    public GooglePlacesServicesModule(BaseActivity fragment, MvpAppCompatActivity appCompatActivity) {
+    public GooglePlacesServicesModule(AppCompatActivity fragment, MvpAppCompatActivity appCompatActivity) {
         googleServicesListener = fragment;
         mAppCompatActivity = appCompatActivity;
     }
@@ -32,6 +33,6 @@ public class GooglePlacesServicesModule {
     @Provides
     //  @PlacesScope
     GooglePlacesServicesHelper provideGoogleServicesHelper() {
-        return new GooglePlacesServicesHelper(mAppCompatActivity, googleServicesListener);
+        return new GooglePlacesServicesHelper(mAppCompatActivity, (GooglePlacesServicesHelper.GoogleServicesListener) googleServicesListener);
     }
 }

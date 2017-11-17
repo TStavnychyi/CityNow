@@ -59,32 +59,7 @@ public class ActivityModule {
         return new GridLayoutManager(activity, 2);
     }
 
-
-    /*
-
     @Provides
-    SearchPlacesCategoriesAdapter provideCategoriesAdapter() {
-        return new SearchPlacesCategoriesAdapter();
-    }
-
-    @Provides
-    LinearLayoutManager provideLinearLayoutManager(AppCompatActivity activity) {
-        return new LinearLayoutManager(activity);
-    }
-
-    @Provides
-    GridLayoutManager provideGridLayoutManager(AppCompatActivity activity) {
-        return new GridLayoutManager(activity, 2);
-    }*/
-/*
-    @Provides
-    @PlacesScope
-    PlacesAdapter providePlacesAdapter(){
-        return new PlacesAdapter();
-    }*/
-
-    @Provides
-        // @PlacesScope
     LinearLayoutManager provideLinearLayoutManager(MvpAppCompatActivity activity) {
         return new LinearLayoutManager(activity);
     }

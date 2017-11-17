@@ -2,6 +2,7 @@ package com.tstv.infofrom.di.module;
 
 import com.tstv.infofrom.rest.RxRestClient;
 import com.tstv.infofrom.rest.api.DetailPlacesApi;
+import com.tstv.infofrom.rest.api.GoogleAutocompleteSearchApi;
 import com.tstv.infofrom.rest.api.NearbyPlacesApi;
 import com.tstv.infofrom.rest.api.PlacesPhotoFromReferenceApi;
 import com.tstv.infofrom.rest.api.WeatherApi;
@@ -41,6 +42,12 @@ public class RestModule {
     PlacesPhotoFromReferenceApi providePlacesPhotoApi() {
         mRxRestClient = new RxRestClient("https://maps.googleapis.com/maps/api/place/photo/");
         return mRxRestClient.createService(PlacesPhotoFromReferenceApi.class);
+    }
+
+    @Provides
+    GoogleAutocompleteSearchApi provideGoogleAutocompleteApi() {
+        mRxRestClient = new RxRestClient("https://maps.googleapis.com/");
+        return mRxRestClient.createService(GoogleAutocompleteSearchApi.class);
     }
 
 }

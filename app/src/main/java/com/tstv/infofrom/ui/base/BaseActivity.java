@@ -4,7 +4,6 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,23 +17,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.arellomobile.mvp.MvpAppCompatActivity;
-import com.tstv.infofrom.MyApplication;
 import com.tstv.infofrom.R;
-import com.tstv.infofrom.common.google.GooglePlacesServicesHelper;
 import com.tstv.infofrom.common.manager.MyFragmentManager;
 import com.tstv.infofrom.common.utils.CommonUtils;
 import com.tstv.infofrom.common.utils.NetworkUtils;
-
-import javax.inject.Inject;
-
-import static com.tstv.infofrom.common.google.GooglePlacesServicesHelper.REQUEST_CODE_AVAILABILITY;
-import static com.tstv.infofrom.common.google.GooglePlacesServicesHelper.REQUEST_CODE_RESOLUTION;
 
 /**
  * Created by tstv on 15.09.2017.
  */
 
-public abstract class BaseActivity extends MvpAppCompatActivity implements BaseView, BaseFragment.Callback, GooglePlacesServicesHelper.GoogleServicesListener {
+public abstract class BaseActivity extends MvpAppCompatActivity implements BaseView, BaseFragment.Callback {
 
     public static final int PLACE_PICKER_REQUEST = 1;
     //  private static final int REQUEST_LOCATION_PERMISSIONS = 2;
@@ -50,11 +42,6 @@ public abstract class BaseActivity extends MvpAppCompatActivity implements BaseV
     // @Inject
     MyFragmentManager myFragmentManager;
 
-    @Inject
-    GooglePlacesServicesHelper mGooglePlacesServicesHelper;
-
-    boolean mIsGooglePlayServicesConnected = false;
-
 /*
     protected abstract Fragment createFragment();
 */
@@ -64,12 +51,8 @@ public abstract class BaseActivity extends MvpAppCompatActivity implements BaseV
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.e("BaseActivity", "isNetworkConnected");
-        MyApplication.get().plusActivityComponent(this, this);
-
-        MyApplication.get().getActivityComponent().inject(this);
-
-        mGooglePlacesServicesHelper.connect();
+        Log.e("BaseActivity", "onCreate");
+        //   MyApplication.get().plusActivityComponent(this, this);
 
       /*  mBottomNavigationMenu.setOnNavigationItemSelectedListener(item -> {
             switch (item.getItemId()) {
@@ -91,32 +74,6 @@ public abstract class BaseActivity extends MvpAppCompatActivity implements BaseV
         FrameLayout parent = (FrameLayout) findViewById(R.id.main_wrapper);
         getLayoutInflater().inflate(R.layout.activity_main, parent);
 
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Log.e("TAG", "BaseActivity onDestroy");
-        mGooglePlacesServicesHelper.disconnect();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CODE_RESOLUTION || requestCode == REQUEST_CODE_AVAILABILITY) {
-            mGooglePlacesServicesHelper.handleActivityResult(requestCode, resultCode, data, getBaseActivity());
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
-    }
-
-    @Override
-    public void onConnected() {
-        mIsGooglePlayServicesConnected = true;
-    }
-
-    @Override
-    public void onDisconnected() {
-        mIsGooglePlayServicesConnected = false;
     }
 
     @TargetApi(Build.VERSION_CODES.M)
@@ -219,10 +176,6 @@ public abstract class BaseActivity extends MvpAppCompatActivity implements BaseV
         snackbar.show();
     }
 
-    public GooglePlacesServicesHelper getGooglePlacesServicesHelper() {
-        return mGooglePlacesServicesHelper;
-    }
-
     public void fragmentOnScreen(BaseFragment baseFragment) {
         setToolbarTitle(baseFragment.createToolbarTitle(this));
     }
@@ -270,7 +223,4 @@ public abstract class BaseActivity extends MvpAppCompatActivity implements BaseV
         return this;
     }
 
-    public boolean isGooglePlayServicesConnected() {
-        return mIsGooglePlayServicesConnected;
-    }
 }

@@ -22,6 +22,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -77,10 +78,10 @@ public class Utils {
     public static void backgroundImage(int isDay, ImageView imageView) {
         switch (isDay) {
             case 0:
-                imageView.setImageResource(R.drawable.night_il);
+                imageView.setImageResource(R.drawable.picture_weather_night);
                 break;
             case 1:
-                imageView.setImageResource(R.drawable.day_il);
+                imageView.setImageResource(R.drawable.picture_weather_day);
                 break;
         }
     }
@@ -114,11 +115,30 @@ public class Utils {
         try {
             List<Address> addresses = gcd.getFromLocation(arg[0], arg[1], 1);
             country = addresses.get(0).getCountryCode();
-            Log.e("TAG", "Country Code : " + country);
         } catch (IOException e) {
             e.printStackTrace();
         }
         return country;
+    }
+
+    public static Double[] getLatLngFromCityName(String cityName, Context context) {
+        Double[] result = new Double[2];
+        try {
+            Geocoder gcd = new Geocoder(context);
+            List<Address> addresses = gcd.getFromLocationName(cityName, 2);
+            List<LatLng> langLng = new ArrayList<>(addresses.size());
+            for (Address address : addresses) {
+                if (address.hasLatitude() && address.hasLongitude()) {
+                    langLng.add(new LatLng(address.getLatitude(), address.getLongitude()));
+                    result[0] = address.getLatitude();
+                    result[1] = address.getLongitude();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Log.e("Utils", "coordinates " + result[0] + result[1]);
+        return result;
     }
 
     public static String getPhotoFromBingAPI(String city) {

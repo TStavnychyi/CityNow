@@ -55,10 +55,10 @@ public class SearchPlacesPresenter extends BasePresenter<SearchPlacesView> {
     void loadVariables(SearchPlacesAdapter adapter, GooglePlacesServicesHelper googlePlacesServicesHelper) {
         mAdapter = adapter;
         mGooglePlacesServicesHelper = googlePlacesServicesHelper;
-        if (MyApplication.getCurrentCountry() != null) {
+        if (MyApplication.getCurrentCountryCode() != null) {
             filter = new AutocompleteFilter.Builder()
                     .setTypeFilter(AutocompleteFilter.TYPE_FILTER_ESTABLISHMENT)
-                    .setCountry(MyApplication.getCurrentCountry())
+                    .setCountry(MyApplication.getCurrentCountryCode())
                     .build();
         }
     }
