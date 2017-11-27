@@ -17,7 +17,6 @@ import com.tstv.infofrom.common.google.GooglePlacesServicesHelper;
 import com.tstv.infofrom.common.utils.Utils;
 import com.tstv.infofrom.model.places.auto_complete.CityPrediction;
 import com.tstv.infofrom.ui.base.BasePresenter;
-import com.tstv.infofrom.ui.base.BaseView;
 import com.tstv.infofrom.ui.base.MainActivity;
 
 import org.json.JSONArray;
@@ -42,7 +41,7 @@ import io.reactivex.subjects.BehaviorSubject;
  */
 
 @InjectViewState
-public class StartPagePresenter extends BasePresenter<BaseView> {
+public class StartPagePresenter extends BasePresenter<StartPageView> {
 
     private static final String TAG = StartPagePresenter.class.getSimpleName();
 
@@ -181,11 +180,11 @@ public class StartPagePresenter extends BasePresenter<BaseView> {
 
                 @Override
                 public void onProviderDisabled(String provider) {
-                    getViewState().showMessage("Make sure to enable Internet on your phone");
+                    getViewState().showSnackBarProblem(StartPageView.ProblemType.Location);
                 }
             }, null);
         } else {
-            getViewState().showSnackBar(BaseView.SnackBarType.LocationDisabled);
+            getViewState().showSnackBarProblem(StartPageView.ProblemType.Location);
             hideProgress();
         }
     }

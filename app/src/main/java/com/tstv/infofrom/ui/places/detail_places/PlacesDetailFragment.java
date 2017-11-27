@@ -242,11 +242,11 @@ public class PlacesDetailFragment extends BaseFragment implements PlacesDetailVi
                 mPresenter.setDetailPlacesApi(mDetailPlacesApi, mPhotoApi, placeId);
 
             } else {
-                Toast.makeText(getContext(), "Place Id is null", Toast.LENGTH_SHORT).show();
+                showMessage("Place Id is null");
                 getActivity().finish();
             }
         } else {
-            getBaseActivity().showError(getString(R.string.internet_turned_off_error));
+            showSnackBar(SnackBarType.NetworkDisabled);
         }
 
     }
@@ -266,6 +266,8 @@ public class PlacesDetailFragment extends BaseFragment implements PlacesDetailVi
 
         if (isNetworkAvailable) {
             mPresenter.loadStart();
+        } else {
+            showSnackBar(SnackBarType.NetworkDisabled);
         }
         return view;
     }
@@ -273,6 +275,11 @@ public class PlacesDetailFragment extends BaseFragment implements PlacesDetailVi
     @Override
     protected BasePresenter getBasePresenter() {
         return mPresenter;
+    }
+
+    @Override
+    protected View getParentLayout() {
+        return mParentView;
     }
 
     @Override
@@ -300,11 +307,6 @@ public class PlacesDetailFragment extends BaseFragment implements PlacesDetailVi
     @Override
     public void showError(String message) {
         Toast.makeText(getBaseActivity(), message, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void showSnackBar(SnackBarType snackBarType) {
-
     }
 
     @Override
@@ -384,7 +386,7 @@ public class PlacesDetailFragment extends BaseFragment implements PlacesDetailVi
                 intent.setData(Uri.parse(url));
                 startActivity(intent);
             } else {
-                Toast.makeText(getActivity(), "This place has no website", Toast.LENGTH_SHORT).show();
+                showMessage("This place has no website");
             }
         }
     }
@@ -399,7 +401,7 @@ public class PlacesDetailFragment extends BaseFragment implements PlacesDetailVi
                 intent.setData(Uri.parse(url));
                 startActivity(intent);
             } else {
-                Toast.makeText(getActivity(), "Can't show this place on the map", Toast.LENGTH_SHORT).show();
+                showMessage("Can't show this place on the map");
             }
         }
 

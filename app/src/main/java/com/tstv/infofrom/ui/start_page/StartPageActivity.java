@@ -43,7 +43,6 @@ import com.tstv.infofrom.common.utils.CommonUtils;
 import com.tstv.infofrom.common.utils.NetworkUtils;
 import com.tstv.infofrom.common.utils.Utils;
 import com.tstv.infofrom.model.places.auto_complete.CityPrediction;
-import com.tstv.infofrom.ui.base.BaseView;
 import com.tstv.infofrom.ui.base.MainActivity;
 
 import java.util.ArrayList;
@@ -59,7 +58,7 @@ import io.reactivex.subjects.BehaviorSubject;
 import static com.tstv.infofrom.common.google.GooglePlacesServicesHelper.REQUEST_CODE_AVAILABILITY;
 import static com.tstv.infofrom.common.google.GooglePlacesServicesHelper.REQUEST_CODE_RESOLUTION;
 
-public class StartPageActivity extends MvpAppCompatActivity implements BaseView, GooglePlacesServicesHelper.GoogleServicesListener {
+public class StartPageActivity extends MvpAppCompatActivity implements StartPageView, GooglePlacesServicesHelper.GoogleServicesListener {
 
     private static final String TAG = StartPageActivity.class.getSimpleName();
 
@@ -87,7 +86,7 @@ public class StartPageActivity extends MvpAppCompatActivity implements BaseView,
 
     @OnClick(R.id.btn_main_page_current_location)
     public void onCurrentLocationClick() {
-        if (isNetworkConnected) {
+        if (Utils.isNetworkAvailableAndConnected(this)) {
             showDataProgress();
             if (ContextCompat.checkSelfPermission(StartPageActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -97,7 +96,7 @@ public class StartPageActivity extends MvpAppCompatActivity implements BaseView,
                 mPresenter.getCurrentLocation(this, mLocationListener);
             }
         } else {
-            showSnackBar(SnackBarType.NetworkDisabled);
+            showSnackBarProblem(ProblemType.NetworkDisabled);
         }
     }
 
@@ -152,7 +151,7 @@ public class StartPageActivity extends MvpAppCompatActivity implements BaseView,
             mGooglePlacesServicesHelper.connect();
 
         } else {
-            showSnackBar(SnackBarType.NetworkDisabled);
+            showSnackBarProblem(ProblemType.NetworkDisabled);
         }
 
         setAutoCompleteTextViewComponents();
@@ -178,7 +177,7 @@ public class StartPageActivity extends MvpAppCompatActivity implements BaseView,
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     mPresenter.getCurrentLocation(this, mLocationListener);
                 } else {
-                    showSnackBar(SnackBarType.LocationDisabled);
+                    showSnackBarProblem(ProblemType.Location);
                 }
                 break;
             default:
@@ -229,18 +228,6 @@ public class StartPageActivity extends MvpAppCompatActivity implements BaseView,
     @Override
     public void showMessage(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void showSnackBar(SnackBarType snackBarType) {
-        switch (snackBarType) {
-            case NetworkDisabled:
-                showNetworkSnackBar();
-                break;
-            case LocationDisabled:
-                showLocationSnackBar();
-                break;
-        }
     }
 
     @Override
@@ -304,7 +291,7 @@ public class StartPageActivity extends MvpAppCompatActivity implements BaseView,
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (isNetworkConnected) {
+                if (Utils.isNetworkAvailableAndConnected(StartPageActivity.this)) {
                     mThreadHandler.removeCallbacksAndMessages(null);
                     mThreadHandler.postDelayed(() -> {
                         mAdapter.resultList = mPresenter.autocomplete(s.toString());
@@ -315,7 +302,7 @@ public class StartPageActivity extends MvpAppCompatActivity implements BaseView,
 
                     }, 500);
                 } else {
-                    showSnackBar(SnackBarType.NetworkDisabled);
+                    showSnackBarProblem(ProblemType.NetworkDisabled);
                 }
 
             }
@@ -333,7 +320,7 @@ public class StartPageActivity extends MvpAppCompatActivity implements BaseView,
             if (isNetworkConnected) {
                 mPresenter.getAutoCompleteLocationData(chooseCity, placeSubject);
             } else {
-                showSnackBar(SnackBarType.NetworkDisabled);
+                showSnackBarProblem(ProblemType.NetworkDisabled);
             }
         });
 
@@ -356,6 +343,18 @@ public class StartPageActivity extends MvpAppCompatActivity implements BaseView,
                     hideDataProgress();
                     startMainActivity();
                 });
+    }
+
+    @Override
+    public void showSnackBarProblem(StartPageView.ProblemType problemType) {
+        switch (problemType) {
+            case NetworkDisabled:
+                showNetworkSnackBar();
+                break;
+            case Location:
+                showLocationSnackBar();
+                break;
+        }
     }
 
     public class PlacesAutoCompleteAdapter extends ArrayAdapter<CityPrediction> implements Filterable {

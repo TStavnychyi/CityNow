@@ -20,7 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ProgressBar;
-import android.widget.Toast;
+import android.widget.RelativeLayout;
 
 import com.arellomobile.mvp.MvpAppCompatActivity;
 import com.arellomobile.mvp.presenter.InjectPresenter;
@@ -29,6 +29,7 @@ import com.google.android.gms.location.places.ui.PlacePicker;
 import com.tstv.infofrom.MyApplication;
 import com.tstv.infofrom.R;
 import com.tstv.infofrom.common.google.GooglePlacesServicesHelper;
+import com.tstv.infofrom.common.utils.Utils;
 import com.tstv.infofrom.rest.api.NearbyPlacesApi;
 import com.tstv.infofrom.ui.base.BaseFragment;
 import com.tstv.infofrom.ui.base.BasePresenter;
@@ -60,6 +61,9 @@ public class SearchPlacesFragment extends BaseFragment implements SearchPlacesVi
     @BindView(R.id.toolbar_search_places)
     Toolbar mToolbar;
 
+    @BindView(R.id.search_places_parent_view)
+    RelativeLayout mParentView;
+
     @InjectPresenter
     SearchPlacesPresenter mPresenter;
 
@@ -75,6 +79,8 @@ public class SearchPlacesFragment extends BaseFragment implements SearchPlacesVi
     @Inject
     GooglePlacesServicesHelper mGooglePlacesServicesHelper;
 
+    private boolean isNetworkConnected;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,6 +95,8 @@ public class SearchPlacesFragment extends BaseFragment implements SearchPlacesVi
         View view = inflater.inflate(R.layout.fragment_search_places, container, false);
 
         ButterKnife.bind(this, view);
+
+        isNetworkConnected = Utils.isNetworkAvailableAndConnected(getContext());
 
         mPresenter.loadVariables(mSearchPlacesAdapter, mGooglePlacesServicesHelper);
 
@@ -144,11 +152,16 @@ public class SearchPlacesFragment extends BaseFragment implements SearchPlacesVi
             searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                 @Override
                 public boolean onQueryTextSubmit(String query) {
-                    if (query != null && !query.isEmpty()) {
-                        mPresenter.getResultFromInput(query);
+                    if (Utils.isNetworkAvailableAndConnected(getContext())) {
+                        if (query != null && !query.isEmpty()) {
+                            mPresenter.getResultFromInput(query);
+                        }
+                        closeKeyboard();
+                        return true;
+                    } else {
+                        showSnackBar(SnackBarType.NetworkDisabled);
+                        return false;
                     }
-                    closeKeyboard();
-                    return true;
                 }
 
                 @Override
@@ -188,6 +201,11 @@ public class SearchPlacesFragment extends BaseFragment implements SearchPlacesVi
     }
 
     @Override
+    protected View getParentLayout() {
+        return mParentView;
+    }
+
+    @Override
     public String TAG() {
         return null;
     }
@@ -210,12 +228,7 @@ public class SearchPlacesFragment extends BaseFragment implements SearchPlacesVi
 
     @Override
     public void showError(String message) {
-        Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void showSnackBar(SnackBarType snackBarType) {
-
+        showMessage(message);
     }
 
     private void initToolbar() {

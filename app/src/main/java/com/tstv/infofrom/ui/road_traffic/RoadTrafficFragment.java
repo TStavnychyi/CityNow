@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -38,6 +39,9 @@ import com.tstv.infofrom.ui.base.BasePresenter;
 
 import javax.inject.Inject;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by tstv on 23.10.2017.
  */
@@ -52,7 +56,6 @@ public class RoadTrafficFragment extends BaseFragment implements RoadTrafficView
 
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
 
-    private MapView mMapView;
     private GoogleMap mGoogleMap;
     private Location mLastLocation;
     private Marker mCurrentLocationMarker;
@@ -63,6 +66,12 @@ public class RoadTrafficFragment extends BaseFragment implements RoadTrafficView
     //if application was started by current location or by user's input
     private boolean mIsFromCurrentLocation;
 
+    @BindView(R.id.road_traffic_parent_view)
+    FrameLayout mParentView;
+
+    @BindView(R.id.map)
+    MapView mMapView;
+
     @Inject
     GoogleLocationServicesHelper mGoogleLocationServicesHelper;
 
@@ -72,16 +81,22 @@ public class RoadTrafficFragment extends BaseFragment implements RoadTrafficView
     @InjectPresenter
     RoadTrafficPresenter mPresenter;
 
+    MarkerOptions markerOptions;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.e(TAG, "onCreate");
+
 
         MyApplication.get().plusRoadTrafficComponent(RoadTrafficFragment.this, getActivity()).inject(this);
 
         mIsFromCurrentLocation = MyApplication.isFromCurrentLocation();
 
         mGoogleApiClient = mGoogleLocationServicesHelper.getApiClient();
+
+        markerOptions = new MarkerOptions();
 
     }
 
@@ -90,16 +105,8 @@ public class RoadTrafficFragment extends BaseFragment implements RoadTrafficView
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_road_traffic, container, false);
 
-        return view;
-    }
-
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        //  mProgressBar = getBaseActivity().getProgressBar();
-
-        mMapView = (MapView) view.findViewById(R.id.map);
+        Log.e(TAG, "onCreateView");
+        ButterKnife.bind(this, view);
 
         showDataProgress();
 
@@ -108,6 +115,8 @@ public class RoadTrafficFragment extends BaseFragment implements RoadTrafficView
         mMapView.getMapAsync(this);
 
         setCurrentLocationButtonPosition();
+
+        return view;
     }
 
     public static RoadTrafficFragment newInstance() {
@@ -151,6 +160,11 @@ public class RoadTrafficFragment extends BaseFragment implements RoadTrafficView
     }
 
     @Override
+    protected View getParentLayout() {
+        return mParentView;
+    }
+
+    @Override
     public void showDataProgress() {
         //   mProgressBar.setVisibility(View.VISIBLE);
         mMapView.setVisibility(View.GONE);
@@ -167,10 +181,6 @@ public class RoadTrafficFragment extends BaseFragment implements RoadTrafficView
         Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
     }
 
-    @Override
-    public void showSnackBar(SnackBarType snackBarType) {
-
-    }
 
     @Override
     public void onConnected() {
@@ -187,7 +197,9 @@ public class RoadTrafficFragment extends BaseFragment implements RoadTrafficView
             }
         }else {*/
         Double[] coordinates = MyApplication.getCurrentLtdLng();
+        Log.e(TAG, "coordinates onConnected : " + coordinates[0] + "," + coordinates[1]);
         LatLng latLng = createLatLng(coordinates[0], coordinates[1]);
+        //  LatLng latLng = new LatLng(52.2296756, 21.012228699999998);
         setMarkerOnTheMap(latLng);
         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
         // }
@@ -220,7 +232,11 @@ public class RoadTrafficFragment extends BaseFragment implements RoadTrafficView
     }
 
     private void setMarkerOnTheMap(LatLng latLng) {
-        MarkerOptions markerOptions = new MarkerOptions();
+        if (mCurrentLocationMarker != null) {
+            mCurrentLocationMarker.remove();
+        }
+
+        Log.e(TAG, "setMarkerOnTheMap" + latLng.latitude + latLng.longitude);
         markerOptions.position(latLng);
         markerOptions.title("current position");
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
@@ -229,6 +245,7 @@ public class RoadTrafficFragment extends BaseFragment implements RoadTrafficView
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        Log.e(TAG, "onMapReady");
         MapsInitializer.initialize(getActivity());
         mGoogleMap = googleMap;
         hideDataProgress();

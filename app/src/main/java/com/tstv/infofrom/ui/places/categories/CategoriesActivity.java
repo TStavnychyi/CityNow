@@ -81,11 +81,6 @@ public class CategoriesActivity extends BaseActivity implements BaseView {
         mCategoriesRecyclerView.setAdapter(mCategoriesAdapter);
     }
 
-    @Override
-    public void showSnackBar(SnackBarType snackBarType) {
-
-    }
-
     class SearchPlacesCategoriesAdapter extends RecyclerView.Adapter<SearchPlacesCategoriesAdapter.CategoriesViewHolder> {
 
         private int[] imagesArray = {R.drawable.icon_food, R.drawable.icon_bank, R.drawable.icon_atm, R.drawable.icon_entertainment, R.drawable.icon_night_club, R.drawable.icon_gas_station,

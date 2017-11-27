@@ -7,12 +7,9 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
-import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.arellomobile.mvp.MvpAppCompatActivity;
@@ -80,26 +77,13 @@ public abstract class BaseActivity extends MvpAppCompatActivity implements BaseV
         }
     }
 
-    @Override
-    public void showSnackBar(SnackBarType snackBarType) {
-
-    }
-
-    private void showSnackBar(String message) {
-        Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content),
-                message, Snackbar.LENGTH_LONG);
-        View sbView = snackbar.getView();
-        TextView textView = (TextView) sbView.findViewById(android.support.design.R.id.snackbar_text);
-        textView.setTextColor(ContextCompat.getColor(this, R.color.white));
-        snackbar.show();
-    }
 
     @Override
     public void showError(String message) {
         if (message != null) {
-            showSnackBar(message);
+            // showSnackBarProblem(message);
         } else {
-            showSnackBar(getString(R.string.some_error));
+            // showSnackBarProblem(getString(R.string.some_error));
         }
     }
 
