@@ -78,7 +78,7 @@ public class SearchPlacesPresenter extends BasePresenter<SearchPlacesView> {
                 .subscribe(obj -> {
                     mSearchViewPlaces.add(obj);
                     mAdapter.setItems(mSearchViewPlaces);
-                });
+                }, error -> getViewState().showError("We can't find anything for you now. Please try later"));
 
     }
 

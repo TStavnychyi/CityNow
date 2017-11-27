@@ -16,11 +16,11 @@ public interface BaseView extends MvpView {
 
     void showMessage(String message);
 
-    void showSnackBar(SnackBarType snackBarType);
+   /* void showSnackBarProblem(ProblemType mProblemType);*/
 
     void hideKeyboard();
 
-    enum SnackBarType {
-        LocationDisabled, NetworkDisabled
-    }
+   /* enum ProblemType {
+        Location, NetworkDisabled
+    }*/
 }

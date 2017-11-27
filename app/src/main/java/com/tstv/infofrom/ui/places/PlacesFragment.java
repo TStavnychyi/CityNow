@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -75,6 +76,9 @@ public class PlacesFragment extends BaseFragment implements PlacesView, AppBarLa
     @BindView(R.id.toolbar_places)
     Toolbar mToolbar;
 
+    @BindView(R.id.places_parent_view)
+    CoordinatorLayout mParentView;
+
     @BindView(R.id.places_collapsing_toolbar)
     CollapsingToolbarLayout mCollapsingToolbarLayout;
 
@@ -137,7 +141,7 @@ public class PlacesFragment extends BaseFragment implements PlacesView, AppBarLa
             mPlacesPresenter.loadVariables(mPlacesAdapter, mGooglePlacesServicesHelper, mNearbyPlacesApi);
             mPlacesPresenter.loadData(isLocationDataAlreadyUploaded, "establishment");
         } else {
-            showMessage(getString(R.string.internet_turned_off_error));
+            showSnackBar(SnackBarType.NetworkDisabled);
         }
 
         mPlacesPresenter.loadStart();
@@ -191,6 +195,11 @@ public class PlacesFragment extends BaseFragment implements PlacesView, AppBarLa
     }
 
     @Override
+    protected View getParentLayout() {
+        return mParentView;
+    }
+
+    @Override
     public String TAG() {
         return TAG;
     }
@@ -236,11 +245,6 @@ public class PlacesFragment extends BaseFragment implements PlacesView, AppBarLa
     @Override
     public void showError(String message) {
         Toast.makeText(getBaseActivity(), message, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void showSnackBar(SnackBarType snackBarType) {
-
     }
 
     @Override

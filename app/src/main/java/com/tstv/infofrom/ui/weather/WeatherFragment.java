@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,7 +21,6 @@ import com.tstv.infofrom.model.weather.Weather;
 import com.tstv.infofrom.rest.api.WeatherApi;
 import com.tstv.infofrom.ui.base.BaseFragment;
 import com.tstv.infofrom.ui.base.BasePresenter;
-import com.tstv.infofrom.ui.start_page.StartPageActivity;
 
 import javax.inject.Inject;
 
@@ -59,6 +59,9 @@ public class WeatherFragment extends BaseFragment implements WeatherView {
     @BindView(R.id.tv_temp_temp)
     protected TextView tv_temp;
 
+    @BindView(R.id.weather_parent_view)
+    RelativeLayout mParentView;
+
     @BindView(R.id.tv_temp_time)
     protected TextView tv_temp_time;
 
@@ -93,7 +96,7 @@ public class WeatherFragment extends BaseFragment implements WeatherView {
                 mPresenter.loadVariables(mWeatherApi, MyApplication.getCurrentLtdLng());
                 mPresenter.loadStart();
             } else {
-                getBaseActivity().showMessage("Can't find current location");
+                showSnackBar(SnackBarType.NetworkDisabled);
             }
         }
 
@@ -127,7 +130,15 @@ public class WeatherFragment extends BaseFragment implements WeatherView {
     }
 
     private void setupSwipeToRefreshLayout(View rootView) {
-        mSwipeRefreshLayout.setOnRefreshListener(() -> mPresenter.loadRefresh());
+        mSwipeRefreshLayout.setOnRefreshListener(() -> {
+                    if (Utils.isNetworkAvailableAndConnected(getContext())) {
+                        mPresenter.loadRefresh();
+                    } else {
+                        mSwipeRefreshLayout.setRefreshing(false);
+                        showSnackBar(SnackBarType.NetworkDisabled);
+                    }
+                }
+        );
 
         mSwipeRefreshLayout.setColorSchemeResources(R.color.colorAccent);
 
@@ -152,6 +163,11 @@ public class WeatherFragment extends BaseFragment implements WeatherView {
     }
 
     @Override
+    protected View getParentLayout() {
+        return mParentView;
+    }
+
+    @Override
     public void showDataProgress() {
         getBaseActivity().showDataProgress();
     }
@@ -164,11 +180,6 @@ public class WeatherFragment extends BaseFragment implements WeatherView {
     @Override
     public void showError(String message) {
         Toast.makeText(getBaseActivity(), message, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void showSnackBar(StartPageActivity.SnackBarType snackBarType) {
-
     }
 
     @Override
