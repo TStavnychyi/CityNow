@@ -44,7 +44,7 @@ public class PlacesDetailActivity extends MvpAppCompatActivity implements MainVi
                 launchFragment(PlacesDetailFragment.newInstance(id));
             }
         } else {
-            Toast.makeText(this, getString(R.string.no_internet_connection_message), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.internet_turned_off_error), Toast.LENGTH_SHORT).show();
         }
     }
 

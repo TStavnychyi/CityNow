@@ -4,7 +4,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:fitsSystemWindows="true"
-                android:background="@color/theme_primary_dark"
+                android:background="@color/theme_primary"
 
     >
 
@@ -12,19 +12,27 @@
         android:id="@+id/toolbar_search_places"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/colorPrimary"
+        android:background="@color/theme_primary_dark"
         app:theme="@style/WhiteToolbar"
         />
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/search_places_rv"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/toolbar_search_places"
+        android:background="@color/white"
+        >
+
+        <android.support.v7.widget.RecyclerView
+        android:id="@+id/search_places_rv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:scrollbars="vertical"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:visibility="gone"
         />
+
+    </RelativeLayout>
 
 </RelativeLayout>

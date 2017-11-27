@@ -20,6 +20,7 @@ import com.tstv.infofrom.model.weather.Weather;
 import com.tstv.infofrom.rest.api.WeatherApi;
 import com.tstv.infofrom.ui.base.BaseFragment;
 import com.tstv.infofrom.ui.base.BasePresenter;
+import com.tstv.infofrom.ui.start_page.StartPageActivity;
 
 import javax.inject.Inject;
 
@@ -87,9 +88,9 @@ public class WeatherFragment extends BaseFragment implements WeatherView {
         View view = inflater.inflate(R.layout.fragment_weather, container, false);
 
         if (isNetworkConnected) {
-            if (MyApplication.getCurrentCity() != null && !MyApplication.getCurrentCity().isEmpty()) {
+            if (MyApplication.getCurrentLtdLng() != null && MyApplication.getCurrentLtdLng().length != 0) {
                 Log.e(TAG, "Current City" + MyApplication.getCurrentCity());
-                mPresenter.loadVariables(mWeatherApi, MyApplication.getCurrentCity());
+                mPresenter.loadVariables(mWeatherApi, MyApplication.getCurrentLtdLng());
                 mPresenter.loadStart();
             } else {
                 getBaseActivity().showMessage("Can't find current location");
@@ -114,6 +115,17 @@ public class WeatherFragment extends BaseFragment implements WeatherView {
         return fragment;
     }
 
+    private void setBackgroundImage(int isDay, ImageView imageView) {
+        switch (isDay) {
+            case 0:
+                imageView.setImageResource(R.drawable.picture_weather_night);
+                break;
+            case 1:
+                imageView.setImageResource(R.drawable.picture_weather_day);
+                break;
+        }
+    }
+
     private void setupSwipeToRefreshLayout(View rootView) {
         mSwipeRefreshLayout.setOnRefreshListener(() -> mPresenter.loadRefresh());
 
@@ -135,18 +147,8 @@ public class WeatherFragment extends BaseFragment implements WeatherView {
     }
 
     @Override
-    protected int getMainContentLayout() {
-        return R.layout.fragment_weather;
-    }
-
-    @Override
     protected BasePresenter getBasePresenter() {
         return mPresenter;
-    }
-
-    @Override
-    public int onCreateToolbarTitle() {
-        return 0;
     }
 
     @Override
@@ -160,30 +162,32 @@ public class WeatherFragment extends BaseFragment implements WeatherView {
     }
 
     @Override
-    public void showRefreshing() {
+    public void showError(String message) {
+        Toast.makeText(getBaseActivity(), message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void showSnackBar(StartPageActivity.SnackBarType snackBarType) {
+
+    }
+
+    @Override
+    public void setData(Weather data) {
+        if (data != null) {
+            tv_temp.setText(data.getCurrent().getTempC().intValue() + " \u2103");
+            tv_temp_description.setText(data.getCurrent().getCondition().getText());
+            tv_temp_time.setText("Local time: " + Utils.convertDateToTime(data.getLocation().getLocaltimeEpoch()));
+            tv_temp_feels_like.setText("Feels like " + data.getCurrent().getFeelslikeC().intValue() + " \u2103");
+            tv_temp_city.setText(MyApplication.getCurrentCity() + ", " + data.getLocation().getCountry());
+            tv_temp_humidity.setText("Humidity " + data.getCurrent().getHumidity() + " \u0025");
+            tv_temp_wind_speed.setText("Wind speed " + data.getCurrent().getWindKph() + " Kph");
+            setBackgroundImage(data.getCurrent().getIsDay(), iv_background_image);
+        }
 
     }
 
     @Override
     public void hideRefreshing() {
         mSwipeRefreshLayout.setRefreshing(false);
-    }
-
-    @Override
-    public void showError(String message) {
-        Toast.makeText(getBaseActivity(), message, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void setData(Weather data) {
-        tv_temp.setText(data.getCurrent().getTempC().intValue() + " \u2103");
-        tv_temp_description.setText(data.getCurrent().getCondition().getText());
-        tv_temp_time.setText("Local time: " + Utils.convertDateToTime(data.getLocation().getLocaltime()));
-        tv_temp_feels_like.setText("Feels like " + data.getCurrent().getFeelslikeC().intValue() + " \u2103");
-        tv_temp_city.setText(data.getLocation().getName() + ", " + data.getLocation().getCountry());
-        tv_temp_humidity.setText("Humidity " + data.getCurrent().getHumidity() + " \u0025");
-        tv_temp_wind_speed.setText("Wind speed " + data.getCurrent().getWindKph() + " Kph");
-        Utils.backgroundImage(data.getCurrent().getIsDay(), iv_background_image);
-
     }
 }

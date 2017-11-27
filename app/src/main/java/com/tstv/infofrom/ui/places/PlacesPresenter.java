@@ -4,17 +4,10 @@ import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.arellomobile.mvp.InjectViewState;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.places.AutocompleteFilter;
-import com.google.android.gms.location.places.AutocompletePrediction;
-import com.google.android.gms.location.places.AutocompletePredictionBuffer;
-import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlacePhotoMetadata;
 import com.google.android.gms.location.places.PlacePhotoMetadataBuffer;
 import com.google.android.gms.location.places.PlacePhotoMetadataResult;
 import com.google.android.gms.location.places.Places;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.tstv.infofrom.MyApplication;
 import com.tstv.infofrom.common.google.GooglePlacesServicesHelper;
 import com.tstv.infofrom.common.utils.Utils;
@@ -40,29 +33,21 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
 
     private static final String WEB_PLACES_API = "AIzaSyCMlZedC-qCI3FrVEovQ49Qg3qlD0BhKFs";
 
-    private String input_text;
-
-    private boolean isLoading;
-
     private String placeType;
 
     private boolean isListLoadedEnough;
 
-    private List<PlacePrediction> mSearchViewPlaces = new ArrayList<>();
     private List<PlacePrediction> mNearbyPlaces = new ArrayList<>();
 
     private PlacesAdapter mPlacesAdapter;
 
 
-    GooglePlacesServicesHelper mGooglePlacesServicesHelper;
+    private GooglePlacesServicesHelper mGooglePlacesServicesHelper;
 
-    NearbyPlacesApi mNearbyPlacesApi;
+    private NearbyPlacesApi mNearbyPlacesApi;
 
-    private AutocompleteFilter filter = new AutocompleteFilter.Builder()
-            .setTypeFilter(Place.TYPE_ATM)
-            .build();
+    private boolean isLoading;
 
-    private LatLngBounds mLatLngBounds;
 
     void loadVariables(PlacesAdapter adapter, GooglePlacesServicesHelper googlePlacesServicesHelper, NearbyPlacesApi nearbyPlacesApi) {
         mPlacesAdapter = adapter;
@@ -70,15 +55,15 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
         mNearbyPlacesApi = nearbyPlacesApi;
     }
 
-    void loadData(ProgressType progressType, boolean isLocationDataAlreadyLoaded, String searchType) {
+    void loadData(boolean isLocationDataAlreadyLoaded, String searchType) {
         placeType = searchType;
         if (!isLocationDataAlreadyLoaded) {
             createLocationDataObservable()
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .doOnSubscribe(disposable -> onLoadingStart(progressType))
+                    .doOnSubscribe(disposable -> onLoadingStart())
                     .doFinally(() -> {
-                        onLoadingFinish(progressType);
+                        onLoadingFinish();
                         if (!isListLoadedEnough) {
                             showRecyclerViewProgressBar();
                         }
@@ -90,10 +75,6 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
                         onLoadingFailed(error);
                     });
         }
-
-        switch (progressType) {
-            case DataProgress:
-                Log.e("TAG", "loadData DataProgress");
                 createNearbyPlacesDataObservable(searchType)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -118,27 +99,6 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
                             Log.e(TAG, "nearbyPlaces onError");
                             isLoading = false;
                         }, () -> isLoading = false);
-                break;
-            case TextAutoComplete:
-                Log.e("TAG", "loadData TextAutoComplete");
-                createSearchDataObservable()
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .doOnSubscribe(disposable -> {
-                                    if (isLocationDataAlreadyLoaded)
-                                        showRecyclerViewProgressBar();
-                                }
-                        )
-                        .subscribe(obj -> {
-                            mSearchViewPlaces.add(obj);
-                            mPlacesAdapter.setItems(mSearchViewPlaces);
-                            if (mPlacesAdapter.isListLoadedEnough()) {
-                                hideRecyclerViewProgressBar();
-                            }
-                        });
-                break;
-
-        }
     }
 
     private Observable<PlacePrediction> createLocationDataObservable() {
@@ -154,7 +114,6 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
 
     private Observable<PlacePrediction> createNearbyPlacesDataObservable(String placesType) {
         String currentLatLng = Utils.getStringLatLngFromDouble(MyApplication.getCurrentLtdLng());
-        Log.e(TAG, "currentLaatLng : " + currentLatLng);
         int radius = 10000;
         return mNearbyPlacesApi.get(currentLatLng, radius, placesType, WEB_PLACES_API)
                 .flatMap(full -> Observable.fromIterable(full.getResults()))
@@ -165,31 +124,6 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
                         getPlacePhoto(item.getPlaceId()),
                         placesType
                 ));
-    }
-
-
-    private Observable<PlacePrediction> createSearchDataObservable() {
-        mLatLngBounds = Utils.getLatLngBoundsFromDouble(MyApplication.getCurrentLtdLng());
-        return Observable.create(sub -> {
-            PendingResult<AutocompletePredictionBuffer> result =
-                    Places.GeoDataApi.getAutocompletePredictions(mGooglePlacesServicesHelper.getApiClient(), input_text, mLatLngBounds, filter);
-            AutocompletePredictionBuffer autocompletePredictions = result.await();
-            final Status status = autocompletePredictions.getStatus();
-            if (!status.isSuccess()) {
-                autocompletePredictions.release();
-                sub.onError(null);
-            } else {
-                for (AutocompletePrediction prediction : autocompletePredictions) {
-                    Bitmap photoPlace = getPlacePhoto(prediction.getPlaceId());
-                    sub.onNext(
-                            new PlacePrediction(prediction.getPlaceId(), (String) prediction.getPrimaryText(null),
-                                    (String) prediction.getSecondaryText(null), photoPlace, placeType)
-                    );
-                }
-            }
-            autocompletePredictions.release();
-            sub.onComplete();
-        });
     }
 
     private Bitmap getPlacePhoto(String id) {
@@ -207,15 +141,6 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
         return image;
     }
 
-    void getInputFromUser(String arg) {
-        input_text = arg;
-        mSearchViewPlaces.clear();
-    }
-
-    void setNearbyPlaces() {
-        mPlacesAdapter.setItems(mNearbyPlaces);
-    }
-
     @Override
     public void loadStart() {
 
@@ -227,14 +152,14 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
     }
 
     @Override
-    public void onLoadingStart(ProgressType progressType) {
-        showProgress(progressType);
+    public void onLoadingStart() {
+        showProgress();
     }
 
     @Override
-    public void onLoadingFinish(ProgressType progressType) {
+    public void onLoadingFinish() {
         isLoading = false;
-        hideProgress(progressType);
+        hideProgress();
     }
 
     private void hideRecyclerViewProgressBar() {
@@ -249,51 +174,21 @@ public class PlacesPresenter extends BasePresenter<PlacesView> {
     public void onLoadingFailed(Throwable throwable) {
         getViewState().showError(throwable.getMessage());
         throwable.printStackTrace();
-        hideProgress(ProgressType.DataProgress);
+        hideProgress();
     }
 
     @Override
-    public void showProgress(ProgressType progressType) {
-        switch (progressType) {
-            case Refreshing:
-                getViewState().showRefreshing();
-                break;
-            case DataProgress:
-                getViewState().showDataProgress();
-                break;
-        }
+    public void showProgress() {
+        getViewState().showDataProgress();
     }
 
     @Override
-    public void hideProgress(ProgressType progressType) {
-        switch (progressType) {
-            case Refreshing:
-                getViewState().hideRefreshing();
-                break;
-            case DataProgress:
-                getViewState().hideDataProgress();
-                break;
-        }
+    public void hideProgress() {
+        getViewState().hideDataProgress();
     }
 
     void clearPlacesAdapterData() {
         mNearbyPlaces.clear();
         mPlacesAdapter.clearListAndNotifyDataChanged();
-    }
-
-    public String getPlaceType() {
-        return placeType;
-    }
-
-    public void setPlaceType(String placeType) {
-        this.placeType = placeType;
-    }
-
-    boolean isLoading() {
-        return isLoading;
-    }
-
-    public void setLoading(boolean loading) {
-        isLoading = loading;
     }
 }

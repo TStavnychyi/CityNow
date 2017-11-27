@@ -246,7 +246,7 @@ public class PlacesDetailFragment extends BaseFragment implements PlacesDetailVi
                 getActivity().finish();
             }
         } else {
-            getBaseActivity().showError(getString(R.string.no_internet_connection_message));
+            getBaseActivity().showError(getString(R.string.internet_turned_off_error));
         }
 
     }
@@ -271,18 +271,8 @@ public class PlacesDetailFragment extends BaseFragment implements PlacesDetailVi
     }
 
     @Override
-    protected int getMainContentLayout() {
-        return R.layout.fragment_places_detail;
-    }
-
-    @Override
     protected BasePresenter getBasePresenter() {
         return mPresenter;
-    }
-
-    @Override
-    public int onCreateToolbarTitle() {
-        return 0;
     }
 
     @Override
@@ -293,16 +283,6 @@ public class PlacesDetailFragment extends BaseFragment implements PlacesDetailVi
     @Override
     public Fragment getFragmentInstance() {
         return null;
-    }
-
-    @Override
-    public void showRefreshing() {
-
-    }
-
-    @Override
-    public void hideRefreshing() {
-
     }
 
     @Override
@@ -320,6 +300,11 @@ public class PlacesDetailFragment extends BaseFragment implements PlacesDetailVi
     @Override
     public void showError(String message) {
         Toast.makeText(getBaseActivity(), message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void showSnackBar(SnackBarType snackBarType) {
+
     }
 
     @Override

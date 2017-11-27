@@ -5,6 +5,5 @@ package com.tstv.infofrom.common.consts;
  */
 
 public class ApiConstants {
-
     public static final String WEATHER_API_KEY = "aee9389451ad428ca76193934171409";
 }

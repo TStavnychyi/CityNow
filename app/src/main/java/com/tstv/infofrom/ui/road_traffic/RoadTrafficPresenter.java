@@ -21,12 +21,12 @@ public class RoadTrafficPresenter extends BasePresenter<RoadTrafficView> {
     }
 
     @Override
-    public void onLoadingStart(ProgressType progressType) {
+    public void onLoadingStart() {
 
     }
 
     @Override
-    public void onLoadingFinish(ProgressType progressType) {
+    public void onLoadingFinish() {
 
     }
 
@@ -36,12 +36,12 @@ public class RoadTrafficPresenter extends BasePresenter<RoadTrafficView> {
     }
 
     @Override
-    public void showProgress(ProgressType progressType) {
+    public void showProgress() {
 
     }
 
     @Override
-    public void hideProgress(ProgressType progressType) {
+    public void hideProgress() {
 
     }
 }

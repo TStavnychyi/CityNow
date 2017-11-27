@@ -88,7 +88,7 @@ public class MyFragmentManager {
     private void commitTransaction(BaseActivity activity, FragmentTransaction transaction) {
         transaction.commit();
 
-        activity.fragmentOnScreen(mCurrentFragment);
+        //  activity.fragmentOnScreen(mCurrentFragment);
     }
 
     public boolean isAlreadyContains(BaseFragment fragment) {

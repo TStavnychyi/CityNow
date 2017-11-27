@@ -12,18 +12,13 @@ public abstract class BasePresenter <V extends BaseView> extends MvpPresenter<V>
 
     public abstract void loadRefresh();
 
-    public abstract void onLoadingStart(ProgressType progressType);
+    public abstract void onLoadingStart();
 
-    public abstract void onLoadingFinish(ProgressType progressType);
+    public abstract void onLoadingFinish();
 
     public abstract void onLoadingFailed(Throwable throwable);
 
-    public abstract void showProgress(ProgressType progressType);
+    public abstract void showProgress();
 
-    public abstract void hideProgress(ProgressType progressType);
-
-    public enum ProgressType{
-        Refreshing, DataProgress, TextAutoComplete
-    }
-
+    public abstract void hideProgress();
 }

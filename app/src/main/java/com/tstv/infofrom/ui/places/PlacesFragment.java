@@ -1,6 +1,5 @@
 package com.tstv.infofrom.ui.places;
 
-import android.Manifest;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -56,12 +55,7 @@ public class PlacesFragment extends BaseFragment implements PlacesView, AppBarLa
 
     private final static String TAG = PlacesFragment.class.getSimpleName();
 
-    private static final int REQUEST_LOCATION_PERMISSIONS = 1;
-
     private static final int REQUEST_CODE_CATEGORIES = 1001;
-
-    private final String[] locationPermission = {
-            Manifest.permission.ACCESS_FINE_LOCATION};
 
     @BindView(R.id.iv_places_image_title)
     ImageView iv_places_image_title;
@@ -69,17 +63,11 @@ public class PlacesFragment extends BaseFragment implements PlacesView, AppBarLa
     @BindView(R.id.tv_places_title)
     TextView tv_places_title;
 
-    /*@BindView(R.id.search_view_places)
-    SearchView mSearchView;*/
-
     @BindView(R.id.appbar_places)
     AppBarLayout mAppBarLayout;
 
     @BindView(R.id.rv_places)
     RecyclerView mRecyclerView;
-
-  /*  @BindView(R.id.tv_places_recommendations)
-    TextView tv_text_above_rv;*/
 
     @BindView(R.id.progress_bar_recy_view)
     ProgressBar pb_recycler_view;
@@ -126,19 +114,6 @@ public class PlacesFragment extends BaseFragment implements PlacesView, AppBarLa
         mGooglePlacesServicesHelper.connect();
         mIsGooglePlayServicesConnected = MyApplication.isGooglePlacesServicesConnected();
         isInternetIsAvailable = getBaseActivity().isNetworkConnected();
-
-        /*if (isInternetIsAvailable) {
-            if (mIsGooglePlayServicesConnected) {
-                mPlacesPresenter.loadVariables(mPlacesAdapter, mGooglePlacesServicesHelper, mNearbyPlacesApi);
-                if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(locationPermission, REQUEST_LOCATION_PERMISSIONS);
-                } else {
-                    requestSingleUpdate();
-                }
-            }
-        } else {
-            showMessage(getString(R.string.no_internet_connection_message));
-        }*/
     }
 
     @Override
@@ -160,9 +135,9 @@ public class PlacesFragment extends BaseFragment implements PlacesView, AppBarLa
 
         if (isInternetIsAvailable) {
             mPlacesPresenter.loadVariables(mPlacesAdapter, mGooglePlacesServicesHelper, mNearbyPlacesApi);
-            mPlacesPresenter.loadData(BasePresenter.ProgressType.DataProgress, isLocationDataAlreadyUploaded, "establishment");
+            mPlacesPresenter.loadData(isLocationDataAlreadyUploaded, "establishment");
         } else {
-            showMessage(getString(R.string.no_internet_connection_message));
+            showMessage(getString(R.string.internet_turned_off_error));
         }
 
         mPlacesPresenter.loadStart();
@@ -172,7 +147,6 @@ public class PlacesFragment extends BaseFragment implements PlacesView, AppBarLa
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.e("TAG", "Destroy" + PlacesFragment.this);
     }
 
     @Override
@@ -204,44 +178,16 @@ public class PlacesFragment extends BaseFragment implements PlacesView, AppBarLa
                 case REQUEST_CODE_CATEGORIES:
                     String placesType = data.getStringExtra(CategoriesActivity.SEARCH_TYPE_EXTRA);
                     clearRecyclerViewData();
-                    mPlacesPresenter.loadData(BasePresenter.ProgressType.DataProgress, true,
+                    mPlacesPresenter.loadData(true,
                             placesType);
                     break;
             }
         }
     }
 
-  /*  @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case REQUEST_LOCATION_PERMISSIONS:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (ActivityCompat.checkSelfPermission(getBaseActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                        requestSingleUpdate();
-                    }
-                } else {
-
-                }
-                break;
-            default:
-                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
-    }*/
-
-    @Override
-    protected int getMainContentLayout() {
-        return R.layout.fragment_places;
-    }
-
     @Override
     protected BasePresenter getBasePresenter() {
         return mPlacesPresenter;
-    }
-
-    @Override
-    public int onCreateToolbarTitle() {
-        return 0;
     }
 
     @Override
@@ -255,16 +201,6 @@ public class PlacesFragment extends BaseFragment implements PlacesView, AppBarLa
         PlacesFragment fragment = new PlacesFragment();
         fragment.setArguments(args);
         return fragment;
-    }
-
-    @Override
-    public void showRefreshing() {
-
-    }
-
-    @Override
-    public void hideRefreshing() {
-
     }
 
     @Override
@@ -302,14 +238,10 @@ public class PlacesFragment extends BaseFragment implements PlacesView, AppBarLa
         Toast.makeText(getBaseActivity(), message, Toast.LENGTH_SHORT).show();
     }
 
-  /*  private void getLocationData(Location location) {
-        Double[] coordinates = {location.getLatitude(), location.getLongitude()};
-        MyApplication.setCurrentLtdLng(coordinates);
-        String city = Utils.getCityFromLatLng(coordinates, getContext());
-        String country = Utils.getCountryCodeFromLatLng(coordinates, getContext());
-        MyApplication.setCurrentCountryCode(country);
-        MyApplication.setCurrentCity(city);
-    }*/
+    @Override
+    public void showSnackBar(SnackBarType snackBarType) {
+
+    }
 
     @Override
     public void setLocationData(PlacePrediction data) {
@@ -338,40 +270,9 @@ public class PlacesFragment extends BaseFragment implements PlacesView, AppBarLa
     private void initToolbar() {
         mAppBarLayout.addOnOffsetChangedListener(this);
         ((MvpAppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
-        //    toolbar.setPadding(0, getStatusBarHeight(), 0, 0);
         getActivity().setTitle(null);
         mToolbar.setTitleTextColor(getResources().getColor(R.color.white));
     }
-
-  /*  private void requestSingleUpdate() throws SecurityException {
-        Log.e("TAG", "requestSingleUpdate");
-        final LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-        if (isNetworkEnabled) {
-            Criteria criteria = new Criteria();
-            criteria.setAccuracy(Criteria.ACCURACY_COARSE);
-            locationManager.requestSingleUpdate(criteria, new LocationListener() {
-                @Override
-                public void onLocationChanged(Location location) {
-                    getLocationData(location);
-                    mPlacesPresenter.loadData(BasePresenter.ProgressType.DataProgress, isLocationDataAlreadyUploaded, "establishment");
-                }
-
-                @Override
-                public void onStatusChanged(String provider, int status, Bundle extras) {
-                }
-
-                @Override
-                public void onProviderEnabled(String provider) {
-                }
-
-                @Override
-                public void onProviderDisabled(String provider) {
-                    Toast.makeText(getBaseActivity(), "Make sure to enable Internet on your phone", Toast.LENGTH_SHORT).show();
-                }
-            }, null);
-        }
-    }*/
 
     private Typeface getBoldItalicFont() {
         return Typeface.createFromAsset(getActivity().getAssets(), "Roboto_BoldItalic.ttf");

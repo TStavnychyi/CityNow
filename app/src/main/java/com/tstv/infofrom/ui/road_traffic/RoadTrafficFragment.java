@@ -60,6 +60,9 @@ public class RoadTrafficFragment extends BaseFragment implements RoadTrafficView
 
     //   private ProgressBar mProgressBar;
 
+    //if application was started by current location or by user's input
+    private boolean mIsFromCurrentLocation;
+
     @Inject
     GoogleLocationServicesHelper mGoogleLocationServicesHelper;
 
@@ -75,6 +78,8 @@ public class RoadTrafficFragment extends BaseFragment implements RoadTrafficView
         super.onCreate(savedInstanceState);
 
         MyApplication.get().plusRoadTrafficComponent(RoadTrafficFragment.this, getActivity()).inject(this);
+
+        mIsFromCurrentLocation = MyApplication.isFromCurrentLocation();
 
         mGoogleApiClient = mGoogleLocationServicesHelper.getApiClient();
 
@@ -141,28 +146,8 @@ public class RoadTrafficFragment extends BaseFragment implements RoadTrafficView
     }
 
     @Override
-    protected int getMainContentLayout() {
-        return R.layout.fragment_road_traffic;
-    }
-
-    @Override
     protected BasePresenter getBasePresenter() {
         return mPresenter;
-    }
-
-    @Override
-    public int onCreateToolbarTitle() {
-        return 0;
-    }
-
-    @Override
-    public void showRefreshing() {
-
-    }
-
-    @Override
-    public void hideRefreshing() {
-
     }
 
     @Override
@@ -183,17 +168,29 @@ public class RoadTrafficFragment extends BaseFragment implements RoadTrafficView
     }
 
     @Override
+    public void showSnackBar(SnackBarType snackBarType) {
+
+    }
+
+    @Override
     public void onConnected() {
-        //  mLocationRequest.setInterval(1000);
-        //mLocationRequest.setFastestInterval(1000);
-        if (mLocationRequest != null) {
-            mLocationRequest.setSmallestDisplacement(10);
-            mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-            if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        /*if (mIsFromCurrentLocation) {
+            //  mLocationRequest.setInterval(1000);
+            //mLocationRequest.setFastestInterval(1000);
+            if (mLocationRequest != null) {
+                mLocationRequest.setSmallestDisplacement(10);
+                mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+                if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+                }
+                //   Toast.makeText(getBaseActivity(), "Google Services is Available now", Toast.LENGTH_SHORT).show();
             }
-            //   Toast.makeText(getBaseActivity(), "Google Services is Available now", Toast.LENGTH_SHORT).show();
-        }
+        }else {*/
+        Double[] coordinates = MyApplication.getCurrentLtdLng();
+        LatLng latLng = createLatLng(coordinates[0], coordinates[1]);
+        setMarkerOnTheMap(latLng);
+        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+        // }
 
     }
 
@@ -211,15 +208,23 @@ public class RoadTrafficFragment extends BaseFragment implements RoadTrafficView
             mCurrentLocationMarker.remove();
         }
 
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        LatLng latLng = createLatLng(location.getLatitude(), location.getLongitude());
+        setMarkerOnTheMap(latLng);
+
+        //moving map camera
+        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+    }
+
+    private LatLng createLatLng(double lat, double lon) {
+        return new LatLng(lat, lon);
+    }
+
+    private void setMarkerOnTheMap(LatLng latLng) {
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
         markerOptions.title("current position");
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
         mCurrentLocationMarker = mGoogleMap.addMarker(markerOptions);
-
-        //moving map camera
-        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
     }
 
     @Override

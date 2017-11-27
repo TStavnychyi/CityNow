@@ -36,7 +36,7 @@
             android:layout_below="@id/no_internet_white_circle"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="24dp"
-            android:text="@string/no_internet_connection_message"
+            android:text="@string/internet_turned_off_error"
             android:textAllCaps="true"
             android:textColor="@color/white"
             android:textSize="24sp"

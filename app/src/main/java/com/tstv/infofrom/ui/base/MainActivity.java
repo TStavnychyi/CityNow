@@ -94,7 +94,6 @@ public class MainActivity extends BaseActivity implements MainView {
     private void showFragment(BaseFragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         if (fragmentManager.findFragmentByTag(fragment.TAG()) != null) {
-            Log.e("TAG", "showFragment ()" + fragment.TAG());
             fragmentManager.beginTransaction().show(fragmentManager.findFragmentByTag(fragment.TAG())).commit();
         } else {
             Log.e("TAG", "add ()" + fragment.TAG());
@@ -148,5 +147,10 @@ public class MainActivity extends BaseActivity implements MainView {
             hideFragment(WeatherFragment.newInstance());
             hideFragment(PlacesFragment.newInstance());
         }
+    }
+
+    @Override
+    public void showSnackBar(SnackBarType snackBarType) {
+
     }
 }

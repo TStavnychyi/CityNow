@@ -79,20 +79,20 @@ public class StartPagePresenter extends BasePresenter<BaseView> {
         Observable.just(location)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe((disposable -> onLoadingStart(null)))
+                .doOnSubscribe((disposable -> onLoadingStart()))
                 .doFinally(() -> {
-                    onLoadingFinish(null);
+                    onLoadingFinish();
                     Intent intent = new Intent(context, MainActivity.class);
                     context.startActivity(intent);
+                    getViewState().hideDataProgress();
                 })
                 .subscribe((data -> getCurrentLocationData(location, context)), error -> {
-                    onLoadingFinish(null);
+                    onLoadingFinish();
                     onLoadingFailed(error);
-
                 });
     }
 
-    void getCurrentLocationData(Location location, Context context) {
+    private void getCurrentLocationData(Location location, Context context) {
         Double[] coordinates = {location.getLatitude(), location.getLongitude()};
         MyApplication.setCurrentLtdLng(coordinates);
         String city = Utils.getCityFromLatLng(coordinates, context);
@@ -108,9 +108,9 @@ public class StartPagePresenter extends BasePresenter<BaseView> {
 
         try {
             StringBuilder sb = new StringBuilder(PLACES_API_BASE + TYPE_AUTOCOMPLETE + OUT_JSON);
-            sb.append("?key=" + API_KEY);
+            sb.append("?key=").append(API_KEY);
             sb.append("&types=(cities)");
-            sb.append("&input=" + URLEncoder.encode(input, "utf8"));
+            sb.append("&input=").append(URLEncoder.encode(input, "utf8"));
 
             URL url = new URL(sb.toString());
             conn = (HttpURLConnection) url.openConnection();
@@ -184,9 +184,11 @@ public class StartPagePresenter extends BasePresenter<BaseView> {
                     getViewState().showMessage("Make sure to enable Internet on your phone");
                 }
             }, null);
+        } else {
+            getViewState().showSnackBar(BaseView.SnackBarType.LocationDisabled);
+            hideProgress();
         }
     }
-
 
     @Override
     public void loadStart() {
@@ -199,13 +201,13 @@ public class StartPagePresenter extends BasePresenter<BaseView> {
     }
 
     @Override
-    public void onLoadingStart(ProgressType progressType) {
-        showProgress(null);
+    public void onLoadingStart() {
+        showProgress();
     }
 
     @Override
-    public void onLoadingFinish(ProgressType progressType) {
-        hideProgress(null);
+    public void onLoadingFinish() {
+        hideProgress();
     }
 
     @Override
@@ -215,12 +217,12 @@ public class StartPagePresenter extends BasePresenter<BaseView> {
     }
 
     @Override
-    public void showProgress(ProgressType progressType) {
+    public void showProgress() {
         getViewState().showDataProgress();
     }
 
     @Override
-    public void hideProgress(ProgressType progressType) {
+    public void hideProgress() {
         getViewState().hideDataProgress();
     }
 }

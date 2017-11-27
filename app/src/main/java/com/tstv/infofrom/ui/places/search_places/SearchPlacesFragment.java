@@ -144,7 +144,9 @@ public class SearchPlacesFragment extends BaseFragment implements SearchPlacesVi
             searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                 @Override
                 public boolean onQueryTextSubmit(String query) {
-                    mPresenter.getResultFromInput(query);
+                    if (query != null && !query.isEmpty()) {
+                        mPresenter.getResultFromInput(query);
+                    }
                     closeKeyboard();
                     return true;
                 }
@@ -181,18 +183,8 @@ public class SearchPlacesFragment extends BaseFragment implements SearchPlacesVi
     }
 
     @Override
-    protected int getMainContentLayout() {
-        return R.layout.fragment_search_places;
-    }
-
-    @Override
     protected BasePresenter getBasePresenter() {
         return mPresenter;
-    }
-
-    @Override
-    public int onCreateToolbarTitle() {
-        return 0;
     }
 
     @Override
@@ -203,16 +195,6 @@ public class SearchPlacesFragment extends BaseFragment implements SearchPlacesVi
     @Override
     public Fragment getFragmentInstance() {
         return null;
-    }
-
-    @Override
-    public void showRefreshing() {
-
-    }
-
-    @Override
-    public void hideRefreshing() {
-
     }
 
     @Override
@@ -229,6 +211,11 @@ public class SearchPlacesFragment extends BaseFragment implements SearchPlacesVi
     @Override
     public void showError(String message) {
         Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void showSnackBar(SnackBarType snackBarType) {
+
     }
 
     private void initToolbar() {

@@ -17,12 +17,15 @@
     <string name="title_activity_maps">Map</string>
     <string name="nav_menu_search">Search</string>
     <string name="some_error">Some Error Occurred!</string>
-    <string name="no_internet_connection_message">No Internet Connection</string>
+    <string name="internet_turned_off_error">No Internet Connection</string>
     <string name="no_internet_explaining">Check your internet connection and try again</string>
     <string name="menu_item_categories">Categories</string>
     <string name="main_page_live_info_from">Live info from</string>
     <string name="main_page_from_current_location">from current location</string>
-    <string name="main_page_et_hint">New York</string>
+    <string name="main_page_et_hint">Search</string>
+    <string name="location_turned_off_error">Make sure you Location is turned on</string>
+    <string name="location_turned_off_action">TURN ON</string>
+    <string name="internet_turned_off_action">CONNECT</string>
 
 
 </resources>

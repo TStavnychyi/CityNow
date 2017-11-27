@@ -9,7 +9,6 @@ import com.tstv.infofrom.di.component.ApplicationComponent;
 import com.tstv.infofrom.di.component.DaggerActivityComponent;
 import com.tstv.infofrom.di.component.DaggerApplicationComponent;
 import com.tstv.infofrom.di.component.DaggerRoadTrafficComponent;
-import com.tstv.infofrom.di.component.PlaceComponent;
 import com.tstv.infofrom.di.component.RoadTrafficComponent;
 import com.tstv.infofrom.di.module.ActivityModule;
 import com.tstv.infofrom.di.module.ApplicationModule;
@@ -32,12 +31,9 @@ public class MyApplication extends Application {
     protected static MyApplication instance;
 
     //Dagger 2 components
-    private PlaceComponent mPlaceComponent;
     private ApplicationComponent sApplicationComponent;
     private RoadTrafficComponent mRoadTrafficComponent;
     private ActivityComponent mActivityComponent;
-    //  private SearchPlacesComponent mSearchPlacesComponent;
-
 
     private static Double[] currentLtdLng;
 
@@ -46,6 +42,9 @@ public class MyApplication extends Application {
     private static String currentCountryCode;
 
     private static String currentCountry;
+
+    //if application was started by current location or by user's input
+    private static boolean isFromCurrentLocation;
 
     private static boolean isGooglePlacesServicesConnected;
 
@@ -102,27 +101,6 @@ public class MyApplication extends Application {
         return mRoadTrafficComponent;
     }
 
-    public RoadTrafficComponent getRoadTrafficComponent() {
-        return mRoadTrafficComponent;
-    }
-
-    /* public SearchPlacesComponent plusSearchPlacesComponent(SearchPlacesFragment fragment, AppCompatActivity activity) {
-         if (mSearchPlacesComponent == null) {
-             mSearchPlacesComponent = DaggerSearchPlacesComponent.builder()
-                     .googlePlacesServicesModule(new GooglePlacesServicesModule(fragment, activity))
-                     .build();
-         }
-         return mSearchPlacesComponent;
-     }
-
-     public SearchPlacesComponent getSearchPlacesComponent() {
-         return mSearchPlacesComponent;
-     }
-
-     public void clearSearchPlacesComponent() {
-         mSearchPlacesComponent = null;
-     }
- */
     public static Double[] getCurrentLtdLng() {
         return currentLtdLng;
     }
@@ -161,6 +139,14 @@ public class MyApplication extends Application {
 
     public static void setIsGooglePlacesServicesConnected(boolean isGooglePlacesServicesConnected) {
         MyApplication.isGooglePlacesServicesConnected = isGooglePlacesServicesConnected;
+    }
+
+    public static boolean isFromCurrentLocation() {
+        return isFromCurrentLocation;
+    }
+
+    public static void setIsFromCurrentLocation(boolean isFromCurrentLocation) {
+        MyApplication.isFromCurrentLocation = isFromCurrentLocation;
     }
 }
 

@@ -142,12 +142,12 @@ public class SearchPlacesPresenter extends BasePresenter<SearchPlacesView> {
     }
 
     @Override
-    public void onLoadingStart(ProgressType progressType) {
+    public void onLoadingStart() {
 
     }
 
     @Override
-    public void onLoadingFinish(ProgressType progressType) {
+    public void onLoadingFinish() {
     }
 
     @Override
@@ -156,12 +156,12 @@ public class SearchPlacesPresenter extends BasePresenter<SearchPlacesView> {
     }
 
     @Override
-    public void showProgress(ProgressType progressType) {
+    public void showProgress() {
 
     }
 
     @Override
-    public void hideProgress(ProgressType progressType) {
+    public void hideProgress() {
 
     }
 }

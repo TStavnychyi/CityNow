@@ -5,11 +5,9 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.net.ConnectivityManager;
 import android.util.Log;
-import android.widget.ImageView;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.tstv.infofrom.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,12 +18,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import static android.content.Context.CONNECTIVITY_SERVICE;
 
@@ -55,35 +53,23 @@ public class Utils {
         return response.substring(46, response.length() - 1);
     }
 
-    public static String convertDateToTime(String dateToConvert) {
+    public static String convertDateToTime(Integer dateToConvert) {
         StringBuilder stringBuilder = new StringBuilder();
-        String time = dateToConvert.substring(10);
-        String result = null;
-        try {
-            SimpleDateFormat format = new SimpleDateFormat("HH:mm");
-            Date dateStr = format.parse(time);
-
-            int hour = dateStr.getHours();
-            int minutes = dateStr.getMinutes();
-            stringBuilder.append(hour + ":");
+        String result;
+        Date date = new Date(dateToConvert * 1000L);
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
+        format.setTimeZone(TimeZone.getDefault());
+        int hour = date.getHours();
+        int minutes = date.getMinutes();
+        stringBuilder.append(hour).append(":");
+        if (minutes >= 0 && minutes <= 9) {
+            stringBuilder.append("0").append(minutes);
+        } else {
             stringBuilder.append(minutes);
-            result = stringBuilder.toString();
-
-        } catch (ParseException e) {
-            e.printStackTrace();
         }
+        result = stringBuilder.toString();
+
         return result;
-    }
-
-    public static void backgroundImage(int isDay, ImageView imageView) {
-        switch (isDay) {
-            case 0:
-                imageView.setImageResource(R.drawable.picture_weather_night);
-                break;
-            case 1:
-                imageView.setImageResource(R.drawable.picture_weather_day);
-                break;
-        }
     }
 
     public static LatLngBounds getLatLngBoundsFromDouble(Double[] arg) {
