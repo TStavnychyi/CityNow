@@ -38,7 +38,6 @@ public class PlacesDetailPresenter extends BasePresenter<PlacesDetailView> {
     private boolean isLoading;
 
     private List<String> photoUrls = new ArrayList<>();
-    private ProgressType progressType = ProgressType.DataProgress;
 
 
     @Override
@@ -47,7 +46,7 @@ public class PlacesDetailPresenter extends BasePresenter<PlacesDetailView> {
         createDetailInfoObservable()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe(disposable -> onLoadingStart(progressType))
+                .doOnSubscribe(disposable -> onLoadingStart())
                 .subscribe(this::getPlacePhotos, error -> {
                     error.printStackTrace();
                     onLoadingFailed(error);
@@ -57,18 +56,17 @@ public class PlacesDetailPresenter extends BasePresenter<PlacesDetailView> {
 
     @Override
     public void loadRefresh() {
-
     }
 
     @Override
-    public void onLoadingStart(ProgressType progressType) {
-        showProgress(progressType);
+    public void onLoadingStart() {
+        showProgress();
     }
 
     @Override
-    public void onLoadingFinish(ProgressType progressType) {
+    public void onLoadingFinish() {
         isLoading = false;
-        hideProgress(progressType);
+        hideProgress();
     }
 
     @Override
@@ -78,27 +76,13 @@ public class PlacesDetailPresenter extends BasePresenter<PlacesDetailView> {
     }
 
     @Override
-    public void showProgress(ProgressType progressType) {
-        switch (progressType) {
-            case Refreshing:
-                getViewState().showRefreshing();
-                break;
-            case DataProgress:
-                getViewState().showDataProgress();
-                break;
-        }
+    public void showProgress() {
+        getViewState().showDataProgress();
     }
 
     @Override
-    public void hideProgress(ProgressType progressType) {
-        switch (progressType) {
-            case Refreshing:
-                getViewState().hideRefreshing();
-                break;
-            case DataProgress:
-                getViewState().hideDataProgress();
-                break;
-        }
+    public void hideProgress() {
+        getViewState().hideDataProgress();
     }
 
     void setDetailPlacesApi(DetailPlacesApi detailPlacesApi, PlacesPhotoFromReferenceApi photoApi, String placeId) {
@@ -165,6 +149,6 @@ public class PlacesDetailPresenter extends BasePresenter<PlacesDetailView> {
     private void updateObjectInView(Result resultObj) {
         Log.e("TAG", "updateObjInView");
         getViewState().setData(resultObj);
-        onLoadingFinish(progressType);
+        onLoadingFinish();
     }
 }

@@ -8,10 +8,6 @@ import com.arellomobile.mvp.MvpView;
 
 public interface BaseView extends MvpView {
 
-    void showRefreshing();
-
-    void hideRefreshing();
-
     void showDataProgress();
 
     void hideDataProgress();
@@ -20,7 +16,11 @@ public interface BaseView extends MvpView {
 
     void showMessage(String message);
 
-    //  boolean isNetworkConnected();
+    void showSnackBar(SnackBarType snackBarType);
 
     void hideKeyboard();
+
+    enum SnackBarType {
+        LocationDisabled, NetworkDisabled
+    }
 }

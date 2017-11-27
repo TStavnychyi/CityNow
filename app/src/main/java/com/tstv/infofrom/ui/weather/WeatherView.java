@@ -11,4 +11,6 @@ public interface WeatherView extends BaseView {
 
     void setData(Weather data);
 
+    void hideRefreshing();
+
 }

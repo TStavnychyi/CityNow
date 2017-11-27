@@ -16,13 +16,14 @@ import android.widget.TextView;
 import com.tstv.infofrom.MyApplication;
 import com.tstv.infofrom.R;
 import com.tstv.infofrom.ui.base.BaseActivity;
+import com.tstv.infofrom.ui.base.BaseView;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class CategoriesActivity extends BaseActivity implements CategoriesView {
+public class CategoriesActivity extends BaseActivity implements BaseView {
 
     private static final String TAG = CategoriesActivity.class.getSimpleName();
 
@@ -80,13 +81,9 @@ public class CategoriesActivity extends BaseActivity implements CategoriesView {
         mCategoriesRecyclerView.setAdapter(mCategoriesAdapter);
     }
 
-    public int getStatusBarHeight() {
-        int result = 0;
-        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            result = getResources().getDimensionPixelSize(resourceId);
-        }
-        return result;
+    @Override
+    public void showSnackBar(SnackBarType snackBarType) {
+
     }
 
     class SearchPlacesCategoriesAdapter extends RecyclerView.Adapter<SearchPlacesCategoriesAdapter.CategoriesViewHolder> {
@@ -130,9 +127,6 @@ public class CategoriesActivity extends BaseActivity implements CategoriesView {
             }
 
             private void setData(int image, String name) {
-                /*ColorGenerator generator = ColorGenerator.MATERIAL;
-                int randomColor = generator.getRandomColor();
-                iv_image.setBackgroundColor(randomColor);*/
                 iv_image.setImageResource(image);
                 tvCategoriesName.setText(name);
             }

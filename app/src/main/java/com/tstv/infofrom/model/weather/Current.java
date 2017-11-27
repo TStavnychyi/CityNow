@@ -1,4 +1,3 @@
-
 package com.tstv.infofrom.model.weather;
 
 import com.google.gson.annotations.Expose;

@@ -20,59 +20,54 @@ public class WeatherPresenter extends BasePresenter<WeatherView> {
 
     private WeatherApi mWeatherApi;
 
-    private String mCity;
+    private Double[] mLatLng;
 
     private boolean mIsLoading;
 
-    void loadVariables(WeatherApi weatherApi, String city) {
+    void loadVariables(WeatherApi weatherApi, Double[] city) {
+        Log.e("TAG", "coordinates : " + city[0] + "," + city[1]);
         mWeatherApi = weatherApi;
-        mCity = city;
+        mLatLng = city;
     }
 
-    private void loadData(ProgressType progressType, String key, String city) {
+    private void onLoadingSuccess(Weather data) {
+        getViewState().setData(data);
+    }
+
+    @Override
+    public void loadStart() {
         if (mIsLoading){
             return;
         }
         mIsLoading = true;
 
-        mWeatherApi.get(key, city)
+        mWeatherApi.get(ApiConstants.WEATHER_API_KEY, mLatLng[0] + "," + mLatLng[1])
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe(disposable -> onLoadingStart(progressType))
-                .doFinally(() -> onLoadingFinish(progressType))
-                .subscribe(response -> {
-                    Log.e("TAG", "Response Success " + response.getCurrent().getTempC());
-                    onLoadingSuccess(progressType, response);
-                },error -> {
+                .doOnSubscribe(disposable -> onLoadingStart())
+                .doFinally(this::onLoadingFinish)
+                .subscribe(this::onLoadingSuccess, error -> {
                     error.printStackTrace();
                     onLoadingFailed(error);
                     Log.e("TAG", "Response error" + error.getMessage());
                 });
     }
 
-    private void onLoadingSuccess(ProgressType progressType, Weather data) {
-        getViewState().setData(data);
-    }
-
-    @Override
-    public void loadStart() {
-        loadData(ProgressType.DataProgress, ApiConstants.WEATHER_API_KEY, mCity);
-    }
-
     @Override
     public void loadRefresh() {
-        loadData(ProgressType.Refreshing, ApiConstants.WEATHER_API_KEY, mCity);
+        loadStart();
     }
 
     @Override
-    public void onLoadingStart(ProgressType progressType) {
-        showProgress(progressType);
+    public void onLoadingStart() {
+        showProgress();
     }
 
     @Override
-    public void onLoadingFinish(ProgressType progressType) {
+    public void onLoadingFinish() {
         mIsLoading = false;
-        hideProgress(progressType);
+        getViewState().hideRefreshing();
+        hideProgress();
     }
 
     @Override
@@ -82,27 +77,14 @@ public class WeatherPresenter extends BasePresenter<WeatherView> {
     }
 
     @Override
-    public void showProgress(ProgressType progressType) {
-        switch (progressType){
-            case Refreshing:
-                getViewState().showRefreshing();
-                break;
-            case DataProgress:
-                getViewState().showDataProgress();
-                break;
-        }
+    public void showProgress() {
+        getViewState().showDataProgress();
+
     }
 
     @Override
-    public void hideProgress(ProgressType progressType) {
-        switch (progressType){
-            case Refreshing:
-                getViewState().hideRefreshing();
-                break;
-            case DataProgress:
-                getViewState().hideDataProgress();
-                break;
-        }
+    public void hideProgress() {
+        getViewState().hideDataProgress();
     }
 
 }
