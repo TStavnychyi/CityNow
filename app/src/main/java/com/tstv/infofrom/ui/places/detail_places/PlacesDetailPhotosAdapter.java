@@ -68,7 +68,7 @@ public class PlacesDetailPhotosAdapter extends RecyclerView.Adapter<PlacesDetail
 
         @Override
         public void onClick(View v) {
-            PlacesPhotoDialog.showoPhotoDialog(mContext, photoUrl);
+            PlacesPhotoDialog.showPhotoDialog(mContext, photoUrl);
         }
     }
 }

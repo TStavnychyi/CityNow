@@ -353,7 +353,7 @@ public class PlacesDetailFragment extends BaseFragment implements PlacesDetailVi
             if (result.getPhotosUrls() != null) {
                 Glide.with(getActivity()).load(result.getPhotosUrls().get(0)).apply(bitmapTransform(new BlurTransformation(5))).into(iv_places_detail_blur_image);
 
-                mPhotosAdapter = new PlacesDetailPhotosAdapter(this.getContext(), result.getPhotosUrls());
+                mPhotosAdapter = new PlacesDetailPhotosAdapter(getContext(), result.getPhotosUrls());
                 rv_photos.setAdapter(mPhotosAdapter);
             } else {
                 ll_places_photos.setVisibility(View.GONE);
