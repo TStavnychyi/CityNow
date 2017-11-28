@@ -1,19 +1,18 @@
 package com.tstv.infofrom.ui.places.detail_places;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AlertDialog;
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.arellomobile.mvp.MvpAppCompatActivity;
-import com.bumptech.glide.Glide;
+import com.squareup.picasso.Picasso;
 import com.tstv.infofrom.R;
 
 /**
@@ -25,47 +24,28 @@ public class PlacesPhotoDialog extends DialogFragment {
     private static final String ARG_PHOTO_URL = "arg_photo_url";
     private static final String DIALOG_PLACE_PHOTO = "dialog_place_photo";
 
-    //@BindView(R.id.iv_dialog_places_photo)
-    ImageView iv_dialog_places_photo;
-
-    private String url;
-
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
-        Log.e("TAG", "onCreateDialog");
-
         View v = LayoutInflater.from(getActivity())
                 .inflate(R.layout.dialog_places_photo, null);
 
-        // ButterKnife.bind(this, v);
-
-        iv_dialog_places_photo = (ImageView) v.findViewById(R.id.iv_dialog_places_photo);
-
+        ImageView iv_dialog_places_photo = (ImageView) v.findViewById(R.id.iv_dialog_places_photo);
 
         Bundle args = getArguments();
-        url = args.getString(ARG_PHOTO_URL);
+        String url = args.getString(ARG_PHOTO_URL);
 
-        Glide.with(getActivity()).load(url).into(iv_dialog_places_photo);
-
-        Log.e("TAG", "URL1 : " + url);
+        Picasso.with(getContext()).load(url).placeholder(R.drawable.image_placeholder).into(iv_dialog_places_photo);
 
         return new AlertDialog.Builder(getActivity())
-                .setView(v)
-                .setCancelable(true)
+                .setView(iv_dialog_places_photo)
                 .create();
 
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        Log.e("TAG", "onResume");
-    }
-
-    public static void showoPhotoDialog(Context context, String photoUrl) {
-        FragmentManager manager = ((MvpAppCompatActivity) context).getSupportFragmentManager();
+    public static void showPhotoDialog(Context context, String photoUrl) {
+        FragmentManager manager = ((AppCompatActivity) context).getSupportFragmentManager();
         PlacesPhotoDialog dialog = new PlacesPhotoDialog();
         Bundle args = new Bundle();
         args.putString(ARG_PHOTO_URL, photoUrl);

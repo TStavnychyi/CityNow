@@ -24,14 +24,7 @@ public class GooglePlacesServicesModule {
         mAppCompatActivity = appCompatActivity;
     }
 
-    /* @Provides
-   //  @PlacesScope
-     MvpAppCompatActivity provideAppCompatActivity() {
-         return mAppCompatActivity;
-     }
- */
     @Provides
-    //  @PlacesScope
     GooglePlacesServicesHelper provideGoogleServicesHelper() {
         return new GooglePlacesServicesHelper(mAppCompatActivity, (GooglePlacesServicesHelper.GoogleServicesListener) googleServicesListener);
     }

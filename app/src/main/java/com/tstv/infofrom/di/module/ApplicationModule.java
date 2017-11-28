@@ -39,21 +39,4 @@ public class ApplicationModule {
         return new MyFragmentManager();
     }
 
-  /*  private Application mApplication;
-
-    public ApplicationModule(Application application) {
-        mApplication = application;
-    }
-
-    @Singleton
-    @Provides
-    Context provideContext() {
-        return mApplication;
-    }
-
-    @Provides
-    MyFragmentManager provideMyFragmentManager() {
-        return new MyFragmentManager();
-    }*/
-
 }

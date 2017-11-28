@@ -19,7 +19,6 @@ public class RestModule {
     private RxRestClient mRxRestClient;
 
     @Provides
-        //  @PlacesScope
     NearbyPlacesApi providePlacesNearbyApi() {
         mRxRestClient = new RxRestClient("https://maps.googleapis.com/");
         return mRxRestClient.createService(NearbyPlacesApi.class);
@@ -32,7 +31,6 @@ public class RestModule {
     }
 
     @Provides
-        // @PlacesScope
     DetailPlacesApi provideDetailPlacesApi() {
         mRxRestClient = new RxRestClient("https://maps.googleapis.com/");
         return mRxRestClient.createService(DetailPlacesApi.class);
