@@ -157,7 +157,7 @@ public class Utils {
 
     private static String performGetCallBingImageSearch(String url) {
         //IF GETTING ERROR,FIRST OF ALL CHECK IS API KEY EXPIRED!!!!
-        String aPI_KEY = "c61745c5264e49618c39afce7b75c093";
+        String aPI_KEY = "2c4dc6a9180546d4af1ac6b9ed16e89f";
         StringBuffer response = null;
         try {
             URL obj = new URL(url);
